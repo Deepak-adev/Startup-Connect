@@ -74,9 +74,10 @@ export const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement
 export interface BadgeProps {
   children?: ReactNode;
   variant?: 'default' | 'success' | 'warning' | 'danger';
+  className?: string;
 }
 
-export const Badge = ({ children, variant = 'default' }: BadgeProps) => {
+export const Badge = ({ children, variant = 'default', className }: BadgeProps) => {
   const styles = {
     default: "bg-slate-800 text-slate-300 border-slate-700",
     success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -84,7 +85,7 @@ export const Badge = ({ children, variant = 'default' }: BadgeProps) => {
     danger: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   };
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", styles[variant])}>
+    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", styles[variant], className)}>
       {children}
     </span>
   );
