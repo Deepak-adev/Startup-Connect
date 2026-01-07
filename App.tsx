@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DynamicWorkspace from './components/DynamicWorkspace';
 import AGUIChat from './components/AGUIChat';
-import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu, Sparkles } from 'lucide-react';
 import { ViewType } from './types';
 import { cn } from './components/ui';
+import { UIStateService } from './services/uiStateService';
 
 export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentView = searchParams.get('view') || ViewType.DASHBOARD;
+  const [isAGUIChatExpanded, setIsAGUIChatExpanded] = useState(() =>
+    UIStateService.getAGUIChatState()
+  );
 
   const navItems = [
     { id: ViewType.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
@@ -20,6 +24,12 @@ export default function App() {
 
   const handleNavClick = (view: ViewType) => {
     setSearchParams({ view });
+  };
+
+  const toggleAGUIChat = () => {
+    const newState = !isAGUIChatExpanded;
+    setIsAGUIChatExpanded(newState);
+    UIStateService.setAGUIChatState(newState);
   };
 
   return (
@@ -72,10 +82,32 @@ export default function App() {
           <DynamicWorkspace />
         </div>
 
-        {/* Panel B: AGUI Chat */}
-        <div className="h-1/2 md:h-full md:flex-1 border-t md:border-t-0 md:border-l border-white/10 shadow-2xl z-10 relative">
-          <AGUIChat />
+        {/* Panel B: AGUI Chat - Collapsible */}
+        <div
+          className={cn(
+            "h-1/2 md:h-full md:flex-1 border-t md:border-t-0 md:border-l border-white/10 shadow-2xl z-10 relative transition-all duration-500 ease-in-out",
+            isAGUIChatExpanded
+              ? "translate-x-0"
+              : "translate-x-full md:translate-x-full"
+          )}
+          style={{
+            minWidth: isAGUIChatExpanded ? 'auto' : '0px',
+            width: isAGUIChatExpanded ? 'auto' : '0px',
+          }}
+        >
+          <AGUIChat onMinimize={toggleAGUIChat} />
         </div>
+
+        {/* Floating Reopen Button - Only when minimized */}
+        {!isAGUIChatExpanded && (
+          <button
+            onClick={toggleAGUIChat}
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xl shadow-indigo-500/50 flex items-center justify-center transition-all hover:scale-110 animate-in fade-in slide-in-from-right duration-300"
+            aria-label="Open AGUI Chat"
+          >
+            <Sparkles size={24} />
+          </button>
+        )}
 
       </main>
     </div>

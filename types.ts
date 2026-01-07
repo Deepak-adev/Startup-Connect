@@ -3,7 +3,8 @@ export enum ViewType {
   PARTNERS = 'partners',
   MARKET_ANALYSIS = 'market_analysis',
   STARTUP_SALE = 'startup_sale',
-  PITCH_DECK = 'pitch_deck'
+  PITCH_DECK = 'pitch_deck',
+  WEBSITE_PREVIEW = 'website_preview'
 }
 
 export interface NavigationParams {
@@ -15,6 +16,7 @@ export interface NavigationParams {
   location?: string;
   q?: string;
   action?: string;
+  websiteId?: string;
 }
 
 export interface AGUIResponse {

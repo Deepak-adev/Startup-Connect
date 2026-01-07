@@ -1,12 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Send, Mic, Sparkles, Bot, User, MicOff, Volume2 } from 'lucide-react';
+import { Send, Mic, Sparkles, Bot, User, MicOff, Volume2, ChevronRight } from 'lucide-react';
 import { Button, Textarea, Skeleton, cn } from './ui';
 import { sendMessageToAGUI } from '../services/geminiService';
 import { liveService } from '../services/liveService';
 import { ChatMessage, AGUIResponse } from '../types';
 
-export default function AGUIChat() {
+interface AGUIChatProps {
+  onMinimize?: () => void;
+}
+
+export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', text: "Hello! I'm AGUI. I can navigate the startup ecosystem for you. Try 'Show me clothing partners' or 'Analyze the market'." }
   ]);
@@ -169,6 +173,17 @@ export default function AGUIChat() {
             <p className="text-xs text-slate-400">{isLive ? "Voice Mode Active" : "AI Graphical Interface"}</p>
           </div>
         </div>
+
+        {/* Minimize Button */}
+        {onMinimize && (
+          <button
+            onClick={onMinimize}
+            className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+            aria-label="Minimize AGUI Chat"
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">

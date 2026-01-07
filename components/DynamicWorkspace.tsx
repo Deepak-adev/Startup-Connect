@@ -5,6 +5,7 @@ import DashboardView from './views/DashboardView';
 import PartnersView from './views/PartnersView';
 import StartupSaleView from './views/StartupSaleView';
 import PitchDeckView from './views/PitchDeckView';
+import WebsitePreviewView from './views/WebsitePreviewView';
 import { Card } from './ui';
 
 export default function DynamicWorkspace() {
@@ -21,6 +22,8 @@ export default function DynamicWorkspace() {
         return <StartupSaleView />;
       case ViewType.PITCH_DECK:
         return <PitchDeckView />;
+      case ViewType.WEBSITE_PREVIEW:
+        return <WebsitePreviewView />;
       // Fallback or other views can be added here
       case ViewType.MARKET_ANALYSIS:
         return (

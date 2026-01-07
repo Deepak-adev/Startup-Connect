@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, Button, Input } from '../ui';
-import { Play, Video, Image as ImageIcon, Sparkles, Loader2, Download } from 'lucide-react';
+import { Play, Video, Image as ImageIcon, Sparkles, Loader2, Download, Globe, ExternalLink } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
+import { WebsiteStorageService } from '../../services/websiteStorage';
 
 export default function PitchDeckView() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const action = searchParams.get('action');
   const query = searchParams.get('q');
-  
+
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
@@ -19,10 +20,13 @@ export default function PitchDeckView() {
   const [hasGeneratedDeck, setHasGeneratedDeck] = useState(false);
   const [deckScript, setDeckScript] = useState<string>(`Slide 1: Problem Statement
 ------------------------
-Current market solutions are fragmented. 
+Current market solutions are fragmented.
 Our solution consolidates...
 
 [AGUI suggestion: Emphasize the cost saving of 40%]`);
+
+  const [isGeneratingWebsite, setIsGeneratingWebsite] = useState(false);
+  const [generatedWebsiteId, setGeneratedWebsiteId] = useState<string | null>(null);
 
   // Trigger Video Gen if URL action demands it
   useEffect(() => {
@@ -42,6 +46,13 @@ Our solution consolidates...
   useEffect(() => {
     if (action === 'generate_deck' && query && !isGeneratingDeck && !hasGeneratedDeck) {
       handleGenerateDeck(query);
+    }
+  }, [action, query]);
+
+  // Trigger Website Gen
+  useEffect(() => {
+    if (action === 'generate_website' && query && !isGeneratingWebsite && !generatedWebsiteId) {
+      handleGenerateWebsite(query);
     }
   }, [action, query]);
 
@@ -141,6 +152,97 @@ Our solution consolidates...
     }
   };
 
+  const handleGenerateWebsite = async (prompt: string) => {
+    setIsGeneratingWebsite(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+      // Generate website content
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: {
+          parts: [{
+            text: `You are a professional web developer. Create a complete, modern, responsive single-page website for: "${prompt}"
+
+Requirements:
+1. Generate THREE separate sections:
+   - HTML: Semantic HTML5 structure with proper tags
+   - CSS: Modern, responsive design with flexbox/grid, mobile-first approach
+   - JavaScript: Interactive elements, smooth animations, form validation if applicable
+
+2. Design style:
+   - Modern, clean UI with professional color scheme
+   - Responsive design (mobile, tablet, desktop)
+   - Smooth animations and transitions
+   - Professional typography
+   - Call-to-action buttons
+
+3. Structure:
+   - Hero section with compelling headline
+   - Features/Services section (3-4 items)
+   - About/Value proposition
+   - Contact/CTA section
+   - Navigation menu
+
+4. Format your response EXACTLY like this:
+===HTML===
+[HTML code here]
+===CSS===
+[CSS code here]
+===JS===
+[JavaScript code here]
+===END===
+
+Make it production-ready and visually appealing!`
+          }]
+        }
+      });
+
+      if (!response.text) {
+        throw new Error('No response from Gemini');
+      }
+
+      // Parse the structured response
+      const text = response.text;
+      const htmlMatch = text.match(/===HTML===\s*([\s\S]*?)\s*===CSS===/);
+      const cssMatch = text.match(/===CSS===\s*([\s\S]*?)\s*===JS===/);
+      const jsMatch = text.match(/===JS===\s*([\s\S]*?)\s*===END===/);
+
+      if (!htmlMatch || !cssMatch || !jsMatch) {
+        throw new Error('Failed to parse generated website structure');
+      }
+
+      const htmlContent = htmlMatch[1].trim();
+      const cssContent = cssMatch[1].trim();
+      const jsContent = jsMatch[1].trim();
+
+      // Generate unique ID
+      const websiteId = `web_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Save to storage
+      const website = {
+        id: websiteId,
+        title: prompt.length > 50 ? prompt.substring(0, 47) + '...' : prompt,
+        prompt: prompt,
+        htmlContent,
+        cssContent,
+        jsContent,
+        createdAt: new Date().toISOString(),
+        previewUrl: `#/?view=website_preview&websiteId=${websiteId}`
+      };
+
+      WebsiteStorageService.saveWebsite(website);
+      setGeneratedWebsiteId(websiteId);
+
+    } catch (error) {
+      console.error('Website generation error:', error);
+      alert('Failed to generate website. Please try again.');
+    } finally {
+      setIsGeneratingWebsite(false);
+    }
+  };
+
   return (
     <div className="space-y-6 h-full flex flex-col animate-in slide-in-from-right duration-500">
       <div className="flex justify-between items-center">
@@ -212,6 +314,31 @@ Our solution consolidates...
                )}
             </div>
 
+            {/* Generated Website Display */}
+            {generatedWebsiteId && (
+              <div className="mt-4 p-4 bg-emerald-950/20 rounded-lg border border-emerald-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <Globe size={16} />
+                    <span className="text-sm font-medium">Website Generated!</span>
+                  </div>
+                </div>
+                <Button
+                  variant="secondary"
+                  className="w-full justify-center gap-2 text-xs"
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set('view', 'website_preview');
+                    params.set('websiteId', generatedWebsiteId);
+                    setSearchParams(params);
+                  }}
+                >
+                  <ExternalLink size={14} />
+                  View Generated Website
+                </Button>
+              </div>
+            )}
+
             <div className="space-y-3">
               <Button 
                 variant="secondary" 
@@ -222,14 +349,23 @@ Our solution consolidates...
                 <Video size={16} className="text-pink-500" />
                 Generate Video (Veo)
               </Button>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 className="w-full justify-start gap-3"
                 onClick={() => handleGenerateLogo(query || 'Innovation')}
                 disabled={isGeneratingLogo}
               >
                 <ImageIcon size={16} className="text-emerald-500" />
                 Generate Logo
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start gap-3"
+                onClick={() => handleGenerateWebsite(query || 'Modern Startup Website')}
+                disabled={isGeneratingWebsite}
+              >
+                <Globe size={16} className="text-blue-500" />
+                {isGeneratingWebsite ? 'Generating Website...' : 'Generate Website'}
               </Button>
               <Button variant="secondary" className="w-full justify-start gap-3">
                 <Sparkles size={16} className="text-amber-500" />

@@ -20,7 +20,7 @@ You drive the website by outputting a JSON object.
 - funding_min: number
 - profit_status: 'profit' | 'loss' | 'break_even'
 - q: search query string
-- action: 'trigger_veo_video' | 'trigger_imagen_logo' | 'generate_deck'
+- action: 'trigger_veo_video' | 'trigger_imagen_logo' | 'generate_deck' | 'generate_website'
 
 **Operational Rules**
 1. Intent First: If user wants to see partners, navigate there immediately.
