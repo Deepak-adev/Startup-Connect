@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Send, Mic, Sparkles, Bot, User, MicOff, Volume2, ChevronRight } from 'lucide-react';
+import { Send, Mic, Sparkles, Bot, User, MicOff, Volume2 } from 'lucide-react';
 import { Button, Textarea, Skeleton, cn } from './ui';
 import { sendMessageToAGUI } from '../services/geminiService';
 import { liveService } from '../services/liveService';
 import { ChatMessage, AGUIResponse } from '../types';
 
 interface AGUIChatProps {
-  onMinimize?: () => void;
+  fullScreenMode?: boolean;
+  initialMessage?: string;
+  systemInstruction?: string;
 }
 
-export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
+export default function AGUIChat({ fullScreenMode = false, initialMessage, systemInstruction }: AGUIChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: "Hello! I'm AGUI. I can navigate the startup ecosystem for you. Try 'Show me clothing partners' or 'Analyze the market'." }
+    { role: 'model', text: initialMessage || "Hello! I'm AGUI. I can navigate the startup ecosystem for you. Try 'Show me clothing partners' or 'Analyze the market'." }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +44,7 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
     setIsLoading(true);
 
     try {
-      const response: AGUIResponse = await sendMessageToAGUI(messages, textToSend);
+      const response: AGUIResponse = await sendMessageToAGUI(messages, textToSend, systemInstruction);
       if (response.navigation && response.navigation.params) {
         const newParams = new URLSearchParams(searchParams);
         Object.entries(response.navigation.params).forEach(([key, value]) => {
@@ -147,15 +149,15 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950/80 backdrop-blur-xl border-l border-white/10">
-      <div className="p-4 border-b border-white/5 flex items-center justify-between">
+    <div className="flex flex-col h-full bg-white border-l border-slate-200">
+      <div className="p-4 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className={cn(
               "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300",
-              isLive ? "bg-indigo-600/20 border-indigo-400 scale-110" : "bg-slate-800 border-indigo-500/30"
+              isLive ? "bg-indigo-50 border-indigo-400 scale-110" : "bg-slate-50 border-slate-200"
             )}>
-              {isLive ? <Volume2 className="w-5 h-5 text-indigo-400 animate-pulse" /> : <Sparkles className="w-5 h-5 text-indigo-400" />}
+              {isLive ? <Volume2 className="w-5 h-5 text-indigo-600 animate-pulse" /> : <Sparkles className="w-5 h-5 text-indigo-600" />}
             </div>
             <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
               <span className={cn(
@@ -169,37 +171,26 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
             </span>
           </div>
           <div>
-            <h2 className="font-display font-bold text-lg leading-none">AGUI</h2>
-            <p className="text-xs text-slate-400">{isLive ? "Voice Mode Active" : "AI Graphical Interface"}</p>
+            <h2 className="font-display font-bold text-lg leading-none text-slate-900">AGUI</h2>
+            <p className="text-xs text-slate-500">{isLive ? "Voice Mode Active" : "AI Graphical Interface"}</p>
           </div>
         </div>
-
-        {/* Minimize Button */}
-        {onMinimize && (
-          <button
-            onClick={onMinimize}
-            className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
-            aria-label="Minimize AGUI Chat"
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, idx) => (
           <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "")}>
             <div className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-              msg.role === 'user' ? "bg-slate-700" : "bg-indigo-600"
+              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm",
+              msg.role === 'user' ? "bg-slate-700 text-white" : "bg-indigo-600 text-white"
             )}>
               {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
             </div>
             <div className={cn(
-              "p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed",
+              "p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed shadow-sm",
               msg.role === 'user'
-                ? "bg-slate-800 text-slate-100 rounded-tr-sm"
-                : "bg-white/10 text-slate-50 backdrop-blur-sm rounded-tl-sm border border-white/5"
+                ? "bg-slate-800 text-white rounded-tr-sm"
+                : "bg-indigo-50 text-slate-800 rounded-tl-sm border border-indigo-100"
             )}>
               {msg.text}
             </div>
@@ -209,9 +200,9 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
         {isLive && liveTranscript && (
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-              <Bot size={14} />
+              <Bot size={14} className="text-white" />
             </div>
-            <div className="p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed bg-indigo-500/10 text-indigo-100 backdrop-blur-sm rounded-tl-sm border border-indigo-500/20 animate-pulse">
+            <div className="p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed bg-indigo-50 text-indigo-900 rounded-tl-sm border border-indigo-200 animate-pulse">
               {liveTranscript}
             </div>
           </div>
@@ -220,18 +211,18 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
         {isLoading && !isLive && (
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-              <Bot size={14} />
+              <Bot size={14} className="text-white" />
             </div>
             <div className="space-y-2 w-full max-w-[70%]">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-[80%]" />
+              <Skeleton className="h-4 w-full bg-slate-200" />
+              <Skeleton className="h-4 w-[80%] bg-slate-200" />
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-white/5 bg-slate-900/50">
+      <div className="p-4 border-t border-slate-200 bg-slate-50/50">
         <div className="relative">
           <Textarea
             value={isListening ? speechTranscript : input}
@@ -240,8 +231,8 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
             disabled={isLive || isListening}
             placeholder={isLive ? "Listening to your voice..." : isListening ? "Capturing speech..." : "Tell AGUI what you need..."}
             className={cn(
-              "pr-24 min-h-[60px] max-h-[120px] transition-all duration-300",
-              isLive || isListening ? "bg-indigo-950/20 border-indigo-500/30" : "bg-slate-800/50 border-slate-700/50 focus:bg-slate-800"
+              "pr-24 min-h-[80px] max-h-[160px] text-lg p-4 transition-all duration-300 shadow-sm",
+              isLive || isListening ? "bg-indigo-50 border-indigo-200 text-indigo-900" : "bg-white border-slate-300 focus:bg-white text-slate-900"
             )}
           />
           <div className="absolute bottom-2 right-2 flex gap-1">
@@ -252,7 +243,7 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
               disabled={isLive}
               className={cn(
                 "h-8 w-8 p-0 rounded-full transition-all",
-                isListening ? "bg-indigo-500/20 text-indigo-400" : "text-slate-400 hover:text-indigo-400"
+                isListening ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-indigo-600"
               )}
             >
               {isListening ? <MicOff size={16} /> : <Mic size={16} />}
@@ -261,7 +252,7 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
               onClick={handleSend}
               disabled={isLoading || !input.trim() || isLive}
               size="sm"
-              className={cn("h-8 w-8 p-0 rounded-full transition-all", input.trim() && !isLive ? "bg-indigo-600 text-white" : "bg-slate-700 text-slate-500")}
+              className={cn("h-8 w-8 p-0 rounded-full transition-all shadow-sm", input.trim() && !isLive ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400")}
             >
               <Send size={14} />
             </Button>
@@ -274,7 +265,7 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div
                   key={i}
-                  className="w-1 bg-indigo-400 rounded-full animate-bounce"
+                  className="w-1 bg-indigo-500 rounded-full animate-bounce"
                   style={{
                     height: `${20 + Math.random() * 80}%`,
                     animationDuration: `${0.5 + Math.random()}s`,
@@ -283,7 +274,7 @@ export default function AGUIChat({ onMinimize }: AGUIChatProps = {}) {
                 />
               ))}
             </div>
-            <span className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold">Live Interaction</span>
+            <span className="text-[10px] uppercase tracking-widest text-indigo-600 font-bold">Live Interaction</span>
           </div>
         )}
       </div>

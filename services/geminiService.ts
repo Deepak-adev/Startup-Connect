@@ -55,10 +55,11 @@ const getClient = () => {
 
 export const sendMessageToAGUI = async (
   history: ChatMessage[],
-  newMessage: string
+  newMessage: string,
+  systemInstruction?: string
 ): Promise<AGUIResponse> => {
   const ai = getClient();
-  
+
   // Construct the conversation history for the context
   // We limit context to last 10 turns to keep it snappy and focused
   const recentHistory = history.slice(-10).map(msg => ({
@@ -74,7 +75,7 @@ export const sendMessageToAGUI = async (
         { role: 'user', parts: [{ text: newMessage }] }
       ],
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: systemInstruction || SYSTEM_INSTRUCTION,
         responseMimeType: "application/json"
       }
     });
