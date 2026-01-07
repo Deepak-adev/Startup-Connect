@@ -7,17 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // --- Card ---
-export interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
   className?: string;
 }
 
-export const Card = ({ children, className }: CardProps) => (
+export const Card: React.FC<CardProps> = ({ children, className, ...props }) => (
   <div className={cn(
     "bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 shadow-xl",
     "hover:bg-white/10 transition-colors duration-300",
     className
-  )}>
+  )} {...props}>
     {children}
   </div>
 );
@@ -30,7 +30,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   className?: string;
 }
 
-export const Button = ({ children, className, variant = 'primary', size = 'md', ...props }: ButtonProps) => {
+export const Button: React.FC<ButtonProps> = ({ children, className, variant = 'primary', size = 'md', ...props }) => {
   const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed";
   
   const variants = {
@@ -46,7 +46,7 @@ export const Button = ({ children, className, variant = 'primary', size = 'md', 
     lg: "h-12 px-6 text-base"
   };
 
-  const finalSize = variant === 'icon' ? '' : sizes[size];
+  const finalSize = variant === 'icon' ? '' : sizes[size || 'md'];
 
   return (
     <button className={cn(baseStyles, variants[variant], finalSize, className)} {...props}>
