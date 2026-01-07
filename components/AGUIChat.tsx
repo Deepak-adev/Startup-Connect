@@ -14,6 +14,9 @@ export default function AGUIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLive, setIsLive] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  // New state for one‑shot voice input
+  const [isListening, setIsListening] = useState(false);
+  const [speechTranscript, setSpeechTranscript] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -68,8 +71,8 @@ export default function AGUIChat() {
           onTranscription: (text) => setLiveTranscript(text),
           onNavigate: (params) => {
             const newParams = new URLSearchParams(searchParams);
-            Object.entries(params).forEach(([k, v]) => { 
-              if (v) newParams.set(k, String(v)); 
+            Object.entries(params).forEach(([k, v]) => {
+              if (v) newParams.set(k, String(v));
             });
             setSearchParams(newParams);
           },
@@ -82,6 +85,54 @@ export default function AGUIChat() {
         console.error("Failed to start voice session", err);
       }
     }
+  };
+
+  // One‑shot voice input using Web Speech API
+  const handleMicClick = () => {
+    if (isListening) {
+      // Stop current recognition
+      (window as any).recognition?.stop();
+      setIsListening(false);
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech Recognition API not supported in this browser.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    (window as any).recognition = recognition; // store globally to stop later
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    let finalTranscript = '';
+    recognition.onresult = (event: any) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+      setSpeechTranscript(finalTranscript + interim);
+    };
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event);
+      setIsListening(false);
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      const trimmed = finalTranscript.trim();
+      if (trimmed) {
+        setInput(trimmed);
+        handleSend();
+      }
+      setSpeechTranscript('');
+    };
+    setIsListening(true);
+    recognition.start();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -131,8 +182,8 @@ export default function AGUIChat() {
             </div>
             <div className={cn(
               "p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed",
-              msg.role === 'user' 
-                ? "bg-slate-800 text-slate-100 rounded-tr-sm" 
+              msg.role === 'user'
+                ? "bg-slate-800 text-slate-100 rounded-tr-sm"
                 : "bg-white/10 text-slate-50 backdrop-blur-sm rounded-tl-sm border border-white/5"
             )}>
               {msg.text}
@@ -153,13 +204,13 @@ export default function AGUIChat() {
 
         {isLoading && !isLive && (
           <div className="flex gap-3">
-             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-               <Bot size={14} />
-             </div>
-             <div className="space-y-2 w-full max-w-[70%]">
-               <Skeleton className="h-4 w-full" />
-               <Skeleton className="h-4 w-[80%]" />
-             </div>
+            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+              <Bot size={14} />
+            </div>
+            <div className="space-y-2 w-full max-w-[70%]">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-[80%]" />
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -167,52 +218,53 @@ export default function AGUIChat() {
 
       <div className="p-4 border-t border-white/5 bg-slate-900/50">
         <div className="relative">
-          <Textarea 
-            value={input}
+          <Textarea
+            value={isListening ? speechTranscript : input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isLive}
-            placeholder={isLive ? "Listening to your voice..." : "Tell AGUI what you need..."}
+            disabled={isLive || isListening}
+            placeholder={isLive ? "Listening to your voice..." : isListening ? "Capturing speech..." : "Tell AGUI what you need..."}
             className={cn(
               "pr-24 min-h-[60px] max-h-[120px] transition-all duration-300",
-              isLive ? "bg-indigo-950/20 border-indigo-500/30" : "bg-slate-800/50 border-slate-700/50 focus:bg-slate-800"
+              isLive || isListening ? "bg-indigo-950/20 border-indigo-500/30" : "bg-slate-800/50 border-slate-700/50 focus:bg-slate-800"
             )}
           />
           <div className="absolute bottom-2 right-2 flex gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={toggleLive}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMicClick}
+              disabled={isLive}
               className={cn(
                 "h-8 w-8 p-0 rounded-full transition-all",
-                isLive ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" : "text-slate-400 hover:text-indigo-400"
+                isListening ? "bg-indigo-500/20 text-indigo-400" : "text-slate-400 hover:text-indigo-400"
               )}
             >
-              {isLive ? <MicOff size={16} /> : <Mic size={16} />}
+              {isListening ? <MicOff size={16} /> : <Mic size={16} />}
             </Button>
-            <Button 
+            <Button
               onClick={handleSend}
               disabled={isLoading || !input.trim() || isLive}
-              size="sm" 
+              size="sm"
               className={cn("h-8 w-8 p-0 rounded-full transition-all", input.trim() && !isLive ? "bg-indigo-600 text-white" : "bg-slate-700 text-slate-500")}
             >
               <Send size={14} />
             </Button>
           </div>
         </div>
-        
+
         {isLive && (
           <div className="mt-3 flex items-center justify-center gap-2">
             <div className="flex gap-1 h-3 items-end">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div 
-                  key={i} 
-                  className="w-1 bg-indigo-400 rounded-full animate-bounce" 
-                  style={{ 
-                    height: `${20 + Math.random() * 80}%`, 
+                <div
+                  key={i}
+                  className="w-1 bg-indigo-400 rounded-full animate-bounce"
+                  style={{
+                    height: `${20 + Math.random() * 80}%`,
                     animationDuration: `${0.5 + Math.random()}s`,
-                    animationDelay: `${i * 0.1}s` 
-                  }} 
+                    animationDelay: `${i * 0.1}s`
+                  }}
                 />
               ))}
             </div>
