@@ -3,6 +3,7 @@ export enum ViewType {
   PARTNERS = 'partners',
   MARKET_ANALYSIS = 'market_analysis',
   STARTUP_SALE = 'startup_sale',
+  ECOTRACK = 'ecotrack',
   PITCH_DECK = 'pitch_deck'
 }
 
@@ -175,4 +176,100 @@ export interface SaleTransaction {
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   createdDate: string;
   completedDate?: string;
+}
+
+// EcoTrack Dashboard Types
+export interface FundingStatus {
+  id: string;
+  startupId: string;
+  startupName: string;
+  totalRequested: number;
+  totalRaised: number;
+  percentageRaised: number;
+  status: 'seeking' | 'funded' | 'partial' | 'rejected';
+  investors: Investor[];
+  lastUpdated: string;
+  nextMilestone?: string;
+}
+
+export interface Investor {
+  id: string;
+  name: string;
+  type: 'angel' | 'vc' | 'corporate' | 'crowd';
+  amount: number;
+  equityPercentage?: number;
+  investmentDate: string;
+  contactInfo: {
+    email: string;
+    phone?: string;
+  };
+}
+
+export interface LoanDisbursement {
+  id: string;
+  startupId: string;
+  loanAmount: number;
+  amountDisbursed: number;
+  remainingAmount: number;
+  disbursementSchedule: DisbursementItem[];
+  status: 'pending' | 'partial' | 'completed' | 'defaulted';
+  interestRate: number;
+  repaymentStartDate: string;
+  nextPaymentDate?: string;
+  lender: string;
+}
+
+export interface DisbursementItem {
+  id: string;
+  amount: number;
+  date: string;
+  status: 'scheduled' | 'disbursed' | 'pending';
+  description: string;
+}
+
+export interface OutstandingPayment {
+  id: string;
+  startupId: string;
+  paymentType: 'loan' | 'invoice' | 'supplier' | 'salary' | 'rent';
+  amount: number;
+  dueDate: string;
+  status: 'overdue' | 'due_soon' | 'scheduled';
+  priority: 'high' | 'medium' | 'low';
+  recipient: string;
+  description: string;
+  lateFee?: number;
+}
+
+export interface MarketSizeAnalysis {
+  id: string;
+  industry: string;
+  totalMarketSize: number;
+  addressableMarket: number;
+  obtainableMarket: number;
+  growthRate: number;
+  competitorCount: number;
+  marketTrends: MarketTrend[];
+  opportunities: string[];
+  threats: string[];
+  lastUpdated: string;
+}
+
+export interface MarketTrend {
+  id: string;
+  title: string;
+  description: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+  timeframe: 'short_term' | 'medium_term' | 'long_term';
+}
+
+export interface EcoTrackMetrics {
+  totalStartups: number;
+  activeFunding: number;
+  totalDisbursed: number;
+  outstandingPayments: number;
+  marketGrowth: number;
+  avgFundingTime: number;
+  repaymentRate: number;
+  lastUpdated: string;
 }
