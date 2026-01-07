@@ -35,8 +35,8 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Space Grotesk', 'sans-serif'],
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            display: ['Space Grotesk', 'Inter', 'sans-serif'],
           },
           colors: {
             background: '#0f172a',
@@ -47,13 +47,68 @@
               950: '#020617',
             },
             primary: {
-              DEFAULT: '#6366f1',
+              DEFAULT: '#0EA5E9',
+              dark: '#0369A1',
               foreground: '#ffffff',
+            },
+            secondary: {
+              DEFAULT: '#10B981',
+              foreground: '#ffffff',
+            },
+            accent: {
+              gold: '#D97706',
+            },
+            sky: {
+              DEFAULT: '#0EA5E9',
+              50: '#f0f9ff',
+              400: '#38bdf8',
+              500: '#0EA5E9',
+              600: '#0284c7',
+              700: '#0369A1',
             }
           },
           backgroundImage: {
-            'gemini-gradient': 'linear-gradient(to right, #6366f1, #a855f7, #ec4899)',
+            'gemini-gradient': 'linear-gradient(135deg, #0EA5E9 0%, #10B981 50%, #D97706 100%)',
             'glass': 'linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+            'hero-gradient': 'radial-gradient(ellipse at top, rgba(14, 165, 233, 0.15), transparent 50%)',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'slide-up': 'slideUp 0.3s ease-out',
+            'scale-in': 'scaleIn 0.2s ease-out',
+            'shimmer': 'shimmer 2s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            scaleIn: {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-1000px 0' },
+              '100%': { backgroundPosition: '1000px 0' },
+            },
+          },
+          boxShadow: {
+            'glow': '0 0 20px rgba(14, 165, 233, 0.3)',
+            'glow-lg': '0 0 40px rgba(14, 165, 233, 0.4)',
+            'inner-glow': 'inset 0 0 20px rgba(14, 165, 233, 0.1)',
+          },
+          letterSpacing: {
+            tighter: '-0.05em',
+            tight: '-0.025em',
+            normal: '0',
+            wide: '0.025em',
+            wider: '0.05em',
+            widest: '0.1em',
           }
         }
       }

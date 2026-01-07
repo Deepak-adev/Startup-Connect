@@ -5,6 +5,7 @@ import DashboardView from './views/DashboardView';
 import PartnersView from './views/PartnersView';
 import PitchDeckView from './views/PitchDeckView';
 import AnalysisView from './views/AnalysisView';
+import WebsitePreviewView from './views/WebsitePreviewView';
 import { Card } from './ui';
 
 export default function DynamicWorkspace() {
@@ -21,7 +22,10 @@ export default function DynamicWorkspace() {
         return <PitchDeckView />;
       case ViewType.MARKET_ANALYSIS:
         return <AnalysisView />;
+      case ViewType.WEBSITE_PREVIEW:
+        return <WebsitePreviewView />;
       case ViewType.STARTUP_SALE:
+      case ViewType.ECOTRACK:
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-12">
             <h2 className="text-2xl font-display font-bold text-slate-800 mb-2">

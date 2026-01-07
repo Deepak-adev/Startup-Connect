@@ -10,9 +10,10 @@ export function cn(...inputs: ClassValue[]) {
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
   className?: string;
+  hover?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className, ...props }) => (
+export const Card: React.FC<CardProps> = ({ children, className, hover = true, ...props }) => (
   <div className={cn(
     "bg-white border border-slate-200 rounded-xl p-6 shadow-sm",
     "hover:shadow-md transition-shadow duration-300",
@@ -43,7 +44,7 @@ export const Button: React.FC<ButtonProps> = ({ children, className, variant = '
   const sizes = {
     sm: "h-8 px-3 text-xs",
     md: "h-10 px-4 text-sm",
-    lg: "h-12 px-6 text-base"
+    lg: "h-12 px-6 text-base font-semibold"
   };
 
   const finalSize = variant === 'icon' ? '' : sizes[size || 'md'];
