@@ -2,7 +2,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DynamicWorkspace from './components/DynamicWorkspace';
 import AGUIChat from './components/AGUIChat';
-import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu, BarChart3 } from 'lucide-react';
 import { ViewType } from './types';
 import { cn } from './components/ui';
 
@@ -14,7 +14,8 @@ export default function App() {
     { id: ViewType.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { id: ViewType.PARTNERS, label: 'Partners', icon: Users },
     { id: ViewType.STARTUP_SALE, label: 'Idea Sale', icon: Wallet },
-    { id: ViewType.MARKET_ANALYSIS, label: 'Analysis', icon: PieChart },
+    { id: ViewType.ECOTRACK, label: 'EcoTrack', icon: PieChart },
+    { id: ViewType.MARKET_ANALYSIS, label: 'Analysis', icon: BarChart3 },
     { id: ViewType.PITCH_DECK, label: 'Pitch Deck', icon: Presentation },
   ];
 
