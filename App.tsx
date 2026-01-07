@@ -13,8 +13,8 @@ export default function App() {
   const navItems = [
     { id: ViewType.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { id: ViewType.PARTNERS, label: 'Partners', icon: Users },
+    { id: ViewType.STARTUP_SALE, label: 'Idea Sale', icon: Wallet },
     { id: ViewType.MARKET_ANALYSIS, label: 'Analysis', icon: PieChart },
-    { id: ViewType.STARTUP_SALE, label: 'Valuation', icon: Wallet },
     { id: ViewType.PITCH_DECK, label: 'Pitch Deck', icon: Presentation },
   ];
 

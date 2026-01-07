@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ViewType } from '../types';
 import DashboardView from './views/DashboardView';
 import PartnersView from './views/PartnersView';
+import StartupSaleView from './views/StartupSaleView';
 import PitchDeckView from './views/PitchDeckView';
 import { Card } from './ui';
 
@@ -16,11 +17,12 @@ export default function DynamicWorkspace() {
         return <DashboardView />;
       case ViewType.PARTNERS:
         return <PartnersView />;
+      case ViewType.STARTUP_SALE:
+        return <StartupSaleView />;
       case ViewType.PITCH_DECK:
         return <PitchDeckView />;
       // Fallback or other views can be added here
       case ViewType.MARKET_ANALYSIS:
-      case ViewType.STARTUP_SALE:
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-12">
             <h2 className="text-2xl font-display font-bold text-slate-200 mb-2">
