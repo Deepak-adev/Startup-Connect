@@ -1,0 +1,7 @@
+{
+  "name": "Startup Connect - AGUI",
+  "description": "A Generative UI platform for entrepreneurs driven by the AGUI AI agent.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
