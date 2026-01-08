@@ -2,7 +2,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DynamicWorkspace from '../components/DynamicWorkspace';
 import AGUIChat from '../components/AGUIChat';
-import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu, Target } from 'lucide-react';
 import { ViewType } from '../types';
 import { cn } from '../components/ui';
 
@@ -10,7 +10,12 @@ export default function Dashboard() {
     const [searchParams, setSearchParams] = useSearchParams();
     const currentView = searchParams.get('view') || ViewType.DASHBOARD;
 
-    const navItems = [
+    const navItems = currentView.startsWith('investor_') ? [
+        { id: ViewType.INVESTOR_DASHBOARD, label: 'Overview', icon: LayoutDashboard },
+        { id: ViewType.INVESTOR_DEAL_FLOW, label: 'Deal Flow', icon: Target },
+        { id: ViewType.INVESTOR_PORTFOLIO, label: 'Portfolio', icon: PieChart },
+        { id: ViewType.INVESTOR_REPORTS, label: 'Reports', icon: Presentation },
+    ] : [
         { id: ViewType.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
         { id: ViewType.PARTNERS, label: 'Partners', icon: Users },
         { id: ViewType.MARKET_ANALYSIS, label: 'Analysis', icon: PieChart },

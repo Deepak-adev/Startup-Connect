@@ -1,0 +1,144 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AGUIChat from '../components/AGUIChat';
+import { ArrowRight } from 'lucide-react';
+
+export default function InvestorInquiry() {
+    const navigate = useNavigate();
+    const [step, setStep] = useState<'register' | 'chat'>('register');
+    const [regData, setRegData] = useState({ email: '', password: '' });
+    const [canProceed, setCanProceed] = useState(false);
+
+    // In a real app, AGUIChat would communicate up when enough info is gathered
+    // For demo, we'll allow skipping or proceeding after some interaction
+    useEffect(() => {
+        if (step === 'chat') {
+            // Simulate analyzing...
+            const timer = setTimeout(() => setCanProceed(true), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [step]);
+
+    const handleComplete = () => {
+        // In a real app, we would parse the 'messages' to extract structured data.
+        // For now, we'll save a flag or generic profile.
+        const mockInvestorProfile = {
+            name: "Venture Capital Partners",
+            type: "VC Firm",
+            thesis: "Investing in early-stage AI and GreenTech startups.",
+            ticketSize: { min: 100000, max: 2000000 },
+            industries: ["AI", "GreenTech", "SaaS"]
+        };
+        localStorage.setItem('investorProfile', JSON.stringify(mockInvestorProfile));
+        navigate('/app?view=investor_dashboard');
+    };
+
+    const handleRegister = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Here you would normally register the user
+        setStep('chat');
+    };
+
+    return (
+        <div className="h-screen w-full bg-slate-50 flex flex-col relative overflow-hidden">
+            {step === 'chat' && (
+                <div className="absolute top-4 right-4 z-50">
+                    <button
+                        onClick={handleComplete}
+                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-indigo-600 font-medium shadow-sm transition-all"
+                    >
+                        <span>Complete Profile</span>
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
+
+            <div className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 flex flex-col min-h-0">
+                <div className="text-center mb-6 flex-shrink-0">
+                    <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900">
+                        {step === 'register' ? 'Join as an Investor' : 'Define Your Investment Thesis'}
+                    </h2>
+                    <p className="text-slate-500 mt-2">
+                        {step === 'register' ? 'Access exclusive deal flow and startup analytics.' : "I'll help curate the best startups for your portfolio."}
+                    </p>
+                </div>
+
+                {step === 'register' ? (
+                    <div className="w-full max-w-md mx-auto bg-white border border-slate-200 rounded-2xl p-8 shadow-xl shadow-slate-200/50 overflow-y-auto">
+                        <form onSubmit={handleRegister} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">Work Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={regData.email}
+                                    onChange={(e) => setRegData({ ...regData, email: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                                    placeholder="investor@fund.com"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={regData.password}
+                                    onChange={(e) => setRegData({ ...regData, password: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-lg shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+                            >
+                                <span>Start Discovery</span>
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </form>
+                    </div>
+                ) : (
+                    /* Full Screen Chat Interface */
+                    <div className="flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 bg-white min-h-0 flex flex-col">
+                        <AGUIChat
+                            fullScreenMode={true}
+                            initialMessage="Welcome Partner. To tailor the deal flow to your needs, I need to understand your investment criteria. What is your primary investment thesis?"
+                            systemInstruction={`
+You are AGUI, an expert investment analyst assisting a new investor onboarding.
+Your goal is to build a comprehensive investment profile by asking probing questions.
+
+Operational Rules:
+1. Ask ONLY ONE question at a time.
+2. Keep questions professional yet conversational.
+3. Wait for the user to answer before moving to the next topic.
+
+Topics to Cover (Ask one by one):
+1. Investment Thesis (What drives your decisions?).
+2. Preferred Stages (Pre-seed, Seed, Series A, Late Stage?).
+3. Target Industries/Verticals (e.g., Fintech, BioTech, AI).
+4. Geographic Focus (Global, US-only, Emerging Markets?).
+5. Average Ticket Size (How much do you typically invest?).
+6. Follow-on Policy (Do you lead rounds? Do you reserve for follow-ons?).
+7. Value Add (Beyond capital, how do you help startups?).
+8. Fund Size / Assets Under Management (AUM).
+9. Deal Flow Volume (How many deals do you want to see per month?).
+10. Co-investment preferences.
+
+Once you have gathered sufficient data points (at least 6-8), output a JSON with:
+  message: "Thank you. I have calibrated your deal flow engine. Redirecting you to your dashboard to view matches..."
+  navigation: { path: "/app", params: { view: "investor_dashboard" } }
+
+Response Format (JSON ONLY):
+{
+  "thought": "Reasoning...",
+  "message": "Your next single question...",
+  "navigation": null
+}
+`}
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

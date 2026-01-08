@@ -6,6 +6,10 @@ import PartnersView from './views/PartnersView';
 import PitchDeckView from './views/PitchDeckView';
 import AnalysisView from './views/AnalysisView';
 import WebsitePreviewView from './views/WebsitePreviewView';
+import InvestorDashboardView from './views/InvestorDashboardView';
+import InvestorDealFlowView from './views/InvestorDealFlowView';
+import InvestorPortfolioView from './views/InvestorPortfolioView';
+import InvestorReportsView from './views/InvestorReportsView';
 import { Card } from './ui';
 
 export default function DynamicWorkspace() {
@@ -24,6 +28,14 @@ export default function DynamicWorkspace() {
         return <AnalysisView />;
       case ViewType.WEBSITE_PREVIEW:
         return <WebsitePreviewView />;
+      case ViewType.INVESTOR_DASHBOARD:
+        return <InvestorDashboardView />;
+      case ViewType.INVESTOR_DEAL_FLOW:
+        return <InvestorDealFlowView />;
+      case ViewType.INVESTOR_PORTFOLIO:
+        return <InvestorPortfolioView />;
+      case ViewType.INVESTOR_REPORTS:
+        return <InvestorReportsView />;
       case ViewType.STARTUP_SALE:
       case ViewType.ECOTRACK:
         return (

@@ -8,12 +8,18 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [userType, setUserType] = useState<'startup' | 'investor'>('startup');
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     // Simulate login delay for effect
     setTimeout(() => {
-      navigate('/inquiry');
+      if (userType === 'investor') {
+        navigate('/app?view=investor_dashboard');
+      } else {
+        navigate('/inquiry');
+      }
     }, 1500);
   };
 
@@ -29,7 +35,29 @@ export default function Login() {
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-display font-bold text-slate-900 mb-2 tracking-tight">Welcome Back</h1>
-          <p className="text-slate-500 text-lg">Sign in to access your startup dashboard</p>
+          <p className="text-slate-500 text-lg">Sign in to access your {userType} dashboard</p>
+        </div>
+
+        {/* User Type Toggle */}
+        <div className="bg-white p-1 rounded-xl border border-slate-200 shadow-sm mb-6 flex">
+          <button
+            onClick={() => setUserType('startup')}
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${userType === 'startup'
+              ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
+          >
+            Startup Founder
+          </button>
+          <button
+            onClick={() => setUserType('investor')}
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${userType === 'investor'
+              ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
+          >
+            Investor
+          </button>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50">
@@ -80,10 +108,10 @@ export default function Login() {
           Don't have an account?{' '}
           <button
             type="button"
-            onClick={() => navigate('/inquiry')}
+            onClick={() => navigate(userType === 'investor' ? '/investor-inquiry' : '/inquiry')}
             className="text-indigo-600 hover:text-indigo-500 font-medium transition-colors hover:underline focus:outline-none"
           >
-            Create Startup Profile
+            {userType === 'investor' ? 'Join as Investor' : 'Create Startup Profile'}
           </button>
         </p>
       </div>

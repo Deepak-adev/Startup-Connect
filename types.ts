@@ -5,7 +5,11 @@ export enum ViewType {
   STARTUP_SALE = 'startup_sale',
   ECOTRACK = 'ecotrack',
   PITCH_DECK = 'pitch_deck',
-  WEBSITE_PREVIEW = 'website_preview'
+  WEBSITE_PREVIEW = 'website_preview',
+  INVESTOR_DASHBOARD = 'investor_dashboard',
+  INVESTOR_DEAL_FLOW = 'investor_deal_flow',
+  INVESTOR_PORTFOLIO = 'investor_portfolio',
+  INVESTOR_REPORTS = 'investor_reports'
 }
 
 export interface NavigationParams {
