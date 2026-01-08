@@ -17,7 +17,11 @@ const initialOpportunities = [
         tags: ['B2B', 'SaaS', 'High Growth'],
         traction: '$50k MRR',
         location: 'San Francisco, CA',
-        documents: ['Pitch Deck.pdf', 'Financial Model.xlsx', 'IP_filings.pdf'],
+        documents: [
+            { name: 'Pitch Deck', type: 'pptx', url: '/documents/Nebula_Pitch_Deck.pptx' },
+            { name: 'Financial Model', type: 'xlsx', url: '#' },
+            { name: 'IP Filings', type: 'pdf', url: '#' }
+        ],
         team: [
             { name: "Dr. Sarah Yen", role: "CEO", ex: "Google DeepMind" },
             { name: "James Ford", role: "CTO", ex: "OpenAI" }
@@ -36,7 +40,11 @@ const initialOpportunities = [
         tags: ['Hardware', 'Climatetech', 'Impact'],
         traction: '3 Active Pilots',
         location: 'Austin, TX',
-        documents: ['Technical Whitepaper.pdf', 'Pilot_Results_Q3.pdf'],
+        documents: [
+            { name: 'Technical Whitepaper', type: 'pdf', url: '#' },
+            { name: 'Pilot Results Q3', type: 'pdf', url: '#' },
+            { name: 'Pitch Deck', type: 'pptx', url: '/documents/AgriSense_Pitch_Deck.pptx' }
+        ],
         team: [
             { name: "Marcus Chen", role: "CEO", ex: "John Deere" }
         ]
@@ -54,7 +62,10 @@ const initialOpportunities = [
         tags: ['Healthcare', 'B2B', 'Regulated'],
         traction: '$1.2M ARR',
         location: 'Boston, MA',
-        documents: ['Series_A_Deck.pdf', 'Audit_Report_2024.pdf'],
+        documents: [
+            { name: 'Series A Deck', type: 'pdf', url: '#' },
+            { name: 'Audit Report 2024', type: 'pdf', url: '#' }
+        ],
         team: [
             { name: "Elena Rodriguez", role: "CEO", ex: "Epic Systems" }
         ]
@@ -72,7 +83,10 @@ const initialOpportunities = [
         tags: ['Hardware', 'Energy', 'R&D Heavy'],
         traction: 'Prototype Validated',
         location: 'Denver, CO',
-        documents: ['Battery_Test_Data.xlsx', 'Patent_Portfolio.pdf'],
+        documents: [
+            { name: 'Battery Test Data', type: 'xlsx', url: '#' },
+            { name: 'Patent Portfolio', type: 'pdf', url: '#' }
+        ],
         team: [
             { name: "Dr. Alan Grant", role: "CSO", ex: "Tesla" }
         ]
@@ -116,8 +130,19 @@ export default function InvestorDealFlowView() {
         setTermSheetSent(false); // Reset state when opening new deal
     };
 
-    const handleDocumentAction = (docName: string) => {
-        setNotification(`Downloading ${docName}...`);
+    const handleDocumentAction = (doc: any) => {
+        if (doc.url && doc.url !== '#') {
+            setNotification(`Downloading ${doc.name}...`);
+            // Trigger download
+            const link = document.createElement('a');
+            link.href = doc.url;
+            link.download = `${doc.name}.${doc.type}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            setNotification(`Preview not available for ${doc.name}`);
+        }
     };
 
     const handlePrepareTermSheet = () => {
@@ -338,7 +363,7 @@ export default function InvestorDealFlowView() {
                                             <Lock size={16} className="text-amber-500" /> Key Documents
                                         </h3>
                                         <div className="space-y-2">
-                                            {selectedDeal.documents.map((doc: string, i: number) => (
+                                            {selectedDeal.documents.map((doc: any, i: number) => (
                                                 <div
                                                     key={i}
                                                     onClick={() => handleDocumentAction(doc)}
@@ -346,7 +371,7 @@ export default function InvestorDealFlowView() {
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <FileText size={18} className="text-slate-400 group-hover:text-indigo-500" />
-                                                        <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{doc}</span>
+                                                        <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{doc.name}.{doc.type}</span>
                                                     </div>
                                                     <Button variant="ghost" size="sm" className="text-indigo-600 opacity-0 group-hover:opacity-100 gap-1">
                                                         <Download size={14} /> Download

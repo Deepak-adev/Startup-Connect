@@ -10,6 +10,7 @@ import InvestorDashboardView from './views/InvestorDashboardView';
 import InvestorDealFlowView from './views/InvestorDealFlowView';
 import InvestorPortfolioView from './views/InvestorPortfolioView';
 import InvestorReportsView from './views/InvestorReportsView';
+import ValuationView from './views/ValuationView';
 import { Card } from './ui';
 
 export default function DynamicWorkspace() {
@@ -37,6 +38,7 @@ export default function DynamicWorkspace() {
       case ViewType.INVESTOR_REPORTS:
         return <InvestorReportsView />;
       case ViewType.STARTUP_SALE:
+        return <ValuationView />;
       case ViewType.ECOTRACK:
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-12">
