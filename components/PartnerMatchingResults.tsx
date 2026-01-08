@@ -9,10 +9,10 @@ interface PartnerMatchingResultsProps {
   showCaseStudies?: boolean;
 }
 
-export default function PartnerMatchingResults({ 
-  partners, 
-  onConnectClick, 
-  showCaseStudies = false 
+export default function PartnerMatchingResults({
+  partners,
+  onConnectClick,
+  showCaseStudies = false
 }: PartnerMatchingResultsProps) {
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null);
 
@@ -37,10 +37,10 @@ export default function PartnerMatchingResults({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-white">
+        <h3 className="text-xl font-semibold text-slate-900">
           Recommended Partners ({partners.length})
         </h3>
-        <div className="text-sm text-slate-400">
+        <div className="text-sm text-slate-600">
           Sorted by match score
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function PartnerMatchingResults({
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h4 className="text-lg font-bold text-white">{partner.name}</h4>
+                  <h4 className="text-lg font-bold text-slate-800">{partner.name}</h4>
                   <Badge className={getMatchScoreBg(partner.matchScore)}>
                     <div className="flex items-center gap-1">
                       <Star size={12} />
@@ -59,14 +59,14 @@ export default function PartnerMatchingResults({
                     </div>
                   </Badge>
                 </div>
-                
-                <div className="flex items-center gap-4 text-sm text-slate-400 mb-3">
+
+                <div className="flex items-center gap-4 text-sm text-slate-600 mb-3">
                   <div className="flex items-center gap-1">
-                    <MapPin size={14} className="text-indigo-400" />
+                    <MapPin size={14} className="text-indigo-600" />
                     {partner.location}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Users size={14} className="text-indigo-400" />
+                    <Users size={14} className="text-indigo-600" />
                     {partner.industry}
                   </div>
                 </div>
@@ -89,57 +89,57 @@ export default function PartnerMatchingResults({
                 <div className={`text-2xl font-bold ${getMatchScoreColor(partner.matchScore)}`}>
                   {partner.matchScore}%
                 </div>
-                <div className="text-xs text-slate-400">Match Score</div>
+                <div className="text-xs text-slate-600">Match Score</div>
               </div>
             </div>
 
             {/* Success Metrics */}
             <div className="grid grid-cols-4 gap-3 mb-4">
-              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
-                <div className="text-xs text-slate-400 mb-1">Revenue Growth</div>
-                <div className="text-sm font-bold text-green-400">
+              <div className="bg-slate-100 rounded-lg p-3 text-center">
+                <div className="text-xs text-slate-600 mb-1">Revenue Growth</div>
+                <div className="text-sm font-bold text-green-600">
                   {formatMetricValue(partner.successMetrics.revenueGrowth)}
                 </div>
               </div>
-              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
-                <div className="text-xs text-slate-400 mb-1">Profitability</div>
-                <div className="text-sm font-bold text-blue-400">
+              <div className="bg-slate-100 rounded-lg p-3 text-center">
+                <div className="text-xs text-slate-600 mb-1">Profitability</div>
+                <div className="text-sm font-bold text-blue-600">
                   {formatMetricValue(partner.successMetrics.profitability)}
                 </div>
               </div>
-              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
-                <div className="text-xs text-slate-400 mb-1">Market Share</div>
-                <div className="text-sm font-bold text-purple-400">
+              <div className="bg-slate-100 rounded-lg p-3 text-center">
+                <div className="text-xs text-slate-600 mb-1">Market Share</div>
+                <div className="text-sm font-bold text-purple-600">
                   {formatMetricValue(partner.successMetrics.marketShare)}
                 </div>
               </div>
-              <div className="bg-slate-800/50 rounded-lg p-3 text-center">
-                <div className="text-xs text-slate-400 mb-1">Efficiency</div>
-                <div className="text-sm font-bold text-orange-400">
+              <div className="bg-slate-100 rounded-lg p-3 text-center">
+                <div className="text-xs text-slate-600 mb-1">Efficiency</div>
+                <div className="text-sm font-bold text-orange-600">
                   {formatMetricValue(partner.successMetrics.operationalEfficiency)}
                 </div>
               </div>
             </div>
 
             {/* Partnership Terms */}
-            <div className="bg-slate-800/30 rounded-lg p-4 mb-4">
-              <div className="text-sm font-medium text-slate-300 mb-3">Partnership Terms</div>
+            <div className="bg-slate-100 rounded-lg p-4 mb-4">
+              <div className="text-sm font-medium text-slate-700 mb-3">Partnership Terms</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <div className="text-xs text-slate-400 mb-1">Investment Range</div>
-                  <div className="text-sm text-white">
+                  <div className="text-xs text-slate-600 mb-1">Investment Range</div>
+                  <div className="text-sm text-slate-900">
                     ${(partner.partnershipTerms.investmentRange.min / 1000).toFixed(0)}k - ${(partner.partnershipTerms.investmentRange.max / 1000).toFixed(0)}k
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-400 mb-1">Equity Required</div>
-                  <div className="text-sm text-white">
+                  <div className="text-xs text-slate-600 mb-1">Equity Required</div>
+                  <div className="text-sm text-slate-900">
                     {partner.partnershipTerms.equityRequired.min}% - {partner.partnershipTerms.equityRequired.max}%
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-400 mb-1">Time Commitment</div>
-                  <div className="text-sm text-white flex items-center gap-1">
+                  <div className="text-xs text-slate-600 mb-1">Time Commitment</div>
+                  <div className="text-sm text-slate-900 flex items-center gap-1">
                     <Clock size={12} />
                     {partner.partnershipTerms.timeCommitment}
                   </div>
@@ -149,10 +149,10 @@ export default function PartnerMatchingResults({
 
             {/* Support Areas */}
             <div className="mb-4">
-              <div className="text-sm font-medium text-slate-300 mb-2">Support Areas</div>
+              <div className="text-sm font-medium text-slate-700 mb-2">Support Areas</div>
               <div className="flex flex-wrap gap-2">
                 {partner.partnershipTerms.supportAreas.map((area, index) => (
-                  <div key={index} className="flex items-center gap-1 text-xs text-green-400">
+                  <div key={index} className="flex items-center gap-1 text-xs text-green-600">
                     <CheckCircle size={10} />
                     {area}
                   </div>
@@ -162,7 +162,7 @@ export default function PartnerMatchingResults({
 
             {/* Case Studies */}
             {showCaseStudies && partner.caseStudies.length > 0 && (
-              <div className="border-t border-slate-700 pt-4">
+              <div className="border-t border-slate-200 pt-4">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -175,22 +175,22 @@ export default function PartnerMatchingResults({
                 {expandedPartner === partner.id && (
                   <div className="space-y-3">
                     {partner.caseStudies.map((caseStudy, index) => (
-                      <div key={index} className="bg-slate-800/50 rounded-lg p-4">
-                        <div className="text-sm font-medium text-white mb-2">
+                      <div key={index} className="bg-slate-100 rounded-lg p-4">
+                        <div className="text-sm font-medium text-slate-800 mb-2">
                           Case Study {index + 1}
                         </div>
                         <div className="space-y-2 text-sm">
                           <div>
-                            <span className="text-slate-400">Problem:</span>
-                            <span className="text-slate-300 ml-2">{caseStudy.problem}</span>
+                            <span className="text-slate-600">Problem:</span>
+                            <span className="text-slate-700 ml-2">{caseStudy.problem}</span>
                           </div>
                           <div>
-                            <span className="text-slate-400">Solution:</span>
-                            <span className="text-slate-300 ml-2">{caseStudy.solution}</span>
+                            <span className="text-slate-600">Solution:</span>
+                            <span className="text-slate-700 ml-2">{caseStudy.solution}</span>
                           </div>
                           <div>
-                            <span className="text-slate-400">Outcome:</span>
-                            <span className="text-green-400 ml-2">{caseStudy.outcome}</span>
+                            <span className="text-slate-600">Outcome:</span>
+                            <span className="text-green-600 ml-2">{caseStudy.outcome}</span>
                           </div>
                         </div>
                       </div>
@@ -201,7 +201,7 @@ export default function PartnerMatchingResults({
             )}
 
             <div className="flex gap-3 mt-4">
-              <Button 
+              <Button
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => onConnectClick?.(partner.id)}
               >
@@ -216,7 +216,7 @@ export default function PartnerMatchingResults({
       </div>
 
       {partners.length === 0 && (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12 text-slate-600">
           <div className="text-lg mb-2">No matching partners found</div>
           <div className="text-sm">Try adjusting your criteria or check back later</div>
         </div>

@@ -165,3 +165,63 @@ export const generateProfileFromChat = async (history: ChatMessage[]): Promise<a
     };
   }
 };
+
+export const generateInvestorProfileFromChat = async (history: ChatMessage[]): Promise<any> => {
+  const ai = getClient();
+
+  const conversation = history.map(msg => ({
+    role: msg.role === 'model' ? 'model' : 'user',
+    parts: [{ text: msg.text }]
+  }));
+
+  const extractionPrompt = `
+    Based on the conversation history above, extract the investor profile information into a structured JSON object.
+    If some information is missing, infer it from the context or use reasonable placeholders.
+    
+    Required JSON Structure:
+    {
+      "name": "Investor/Fund Name",
+      "type": "Type (Angel, VC, Family Office, etc.)",
+      "thesis": "Investment thesis",
+      "preferredStages": "Preferred stages (Pre-seed, Seed, Series A, etc.)",
+      "industries": ["Array of target industries"],
+      "geographicFocus": "Geographic focus",
+      "ticketSize": {
+        "min": "Minimum investment amount",
+        "max": "Maximum investment amount"
+      },
+      "followOnPolicy": "Follow-on investment policy",
+      "valueAdd": "How they help beyond capital",
+      "fundSize": "Fund size / AUM",
+      "dealFlowVolume": "Preferred deal flow volume",
+      "coInvestmentPreferences": "Co-investment preferences"
+    }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        ...conversation,
+        { role: 'user', parts: [{ text: extractionPrompt }] }
+      ],
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const responseText = response.text;
+    if (!responseText) throw new Error("Empty response from extraction");
+
+    return JSON.parse(responseText.trim());
+  } catch (error) {
+    console.error("Investor Profile Extraction Error:", error);
+    return {
+      name: "New Investor",
+      type: "Angel",
+      thesis: "Investing in promising startups.",
+      industries: ["Technology"],
+      ticketSize: { min: "$50K", max: "$500K" }
+    };
+  }
+};

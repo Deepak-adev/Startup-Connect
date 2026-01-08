@@ -35,7 +35,7 @@ export default function PartnersView() {
 
   const weaknessFilters = useMemo(() => {
     return WeaknessFilteringService.getFilterCounts(
-      WeaknessFilteringService.getAllFilters(), 
+      WeaknessFilteringService.getAllFilters(),
       MOCK_SUCCESSFUL_PARTNERS
     );
   }, []);
@@ -77,11 +77,11 @@ export default function PartnersView() {
       const newFilters = prev.includes(filterId)
         ? prev.filter(id => id !== filterId)
         : [...prev, filterId];
-      
+
       // Update filtered partners based on new selection
       const filtered = WeaknessFilteringService.getPartnersByWeaknesses(newFilters, MOCK_SUCCESSFUL_PARTNERS);
       setFilteredPartnersByWeakness(filtered);
-      
+
       return newFilters;
     });
   };
@@ -100,8 +100,8 @@ export default function PartnersView() {
       <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold text-white">Filter by Weaknesses</h1>
-            <p className="text-slate-400 mt-1">
+            <h1 className="text-3xl font-display font-bold text-slate-900">Filter by Weaknesses</h1>
+            <p className="text-slate-600 mt-1">
               Select your business challenges to find partners with matching strengths
             </p>
           </div>
@@ -116,7 +116,7 @@ export default function PartnersView() {
             )}
           </div>
         </div>
-        
+
         <WeaknessFilters
           filters={weaknessFilters}
           selectedFilters={selectedWeaknessFilters}
@@ -126,7 +126,7 @@ export default function PartnersView() {
 
         {selectedWeaknessFilters.length > 0 && filteredPartnersByWeakness.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-xl font-semibold text-white mb-4">
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">
               Matching Partners ({filteredPartnersByWeakness.length})
             </h3>
             <PartnerMatchingResults
@@ -145,8 +145,8 @@ export default function PartnersView() {
       <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold text-white">Business Loss Analysis</h1>
-            <p className="text-slate-400 mt-1">
+            <h1 className="text-3xl font-display font-bold text-slate-900">Business Loss Analysis</h1>
+            <p className="text-slate-600 mt-1">
               Identify reasons for business losses and find strategic partners
             </p>
           </div>
@@ -171,16 +171,16 @@ export default function PartnersView() {
   if (viewMode === 'partner-matching') {
     const displayPartners = selectedWeaknessFilters.length > 0 ? filteredPartnersByWeakness : matchedPartners;
     const isWeaknessFiltering = selectedWeaknessFilters.length > 0;
-    
+
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold text-white">
+            <h1 className="text-3xl font-display font-bold text-slate-900">
               {isWeaknessFiltering ? 'Partners for Your Weaknesses' : 'Partner Matching Results'}
             </h1>
-            <p className="text-slate-400 mt-1">
-              {isWeaknessFiltering 
+            <p className="text-slate-600 mt-1">
+              {isWeaknessFiltering
                 ? 'Strategic partners matched to address your specific business challenges'
                 : 'Strategic partners matched to address your business challenges'}
             </p>
@@ -199,7 +199,7 @@ export default function PartnersView() {
             </Button>
           </div>
         </div>
-        
+
         {isWeaknessFiltering && selectedWeaknessFilters.length > 0 && (
           <div className="bg-slate-800/30 rounded-lg p-3 border border-slate-700">
             <div className="text-sm text-slate-400 mb-2">Selected Weaknesses:</div>
@@ -215,8 +215,8 @@ export default function PartnersView() {
             </div>
           </div>
         )}
-        
-        <PartnerMatchingResults 
+
+        <PartnerMatchingResults
           partners={displayPartners}
           onConnectClick={handleConnectClick}
           showCaseStudies={true}
@@ -229,8 +229,8 @@ export default function PartnersView() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-white">Collaboration Matching</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-display font-bold text-slate-900">Collaboration Matching</h1>
+          <p className="text-slate-600 mt-1">
             {industryFilter
               ? `Showing partners in the ${industryFilter} industry`
               : "Find strategic partners for your startup"}
@@ -243,14 +243,14 @@ export default function PartnersView() {
           <Button variant="secondary" size="sm" className="gap-2">
             <Filter size={16} /> Filters
           </Button>
-          <Button 
+          <Button
             onClick={handleShowWeaknessFilters}
             className="bg-orange-600 hover:bg-orange-700"
           >
             <Filter size={16} className="mr-2" />
             Filter by Weaknesses
           </Button>
-          <Button 
+          <Button
             onClick={handleAnalyzeLosses}
             className="bg-red-600 hover:bg-red-700"
           >
@@ -264,12 +264,12 @@ export default function PartnersView() {
         <div className="flex items-start gap-3">
           <AlertCircle className="text-orange-400 mt-0.5" size={20} />
           <div>
-            <h3 className="text-white font-semibold mb-1">Find Partners for Your Weaknesses</h3>
-            <p className="text-slate-300 text-sm mb-3">
+            <h3 className="text-orange-900 font-semibold mb-1">Find Partners for Your Weaknesses</h3>
+            <p className="text-orange-800 text-sm mb-3">
               Select your specific business challenges and we'll match you with partners who have proven strengths in those areas.
             </p>
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={handleShowWeaknessFilters}
                 size="sm"
                 className="bg-orange-600 hover:bg-orange-700"
@@ -277,7 +277,7 @@ export default function PartnersView() {
                 <Filter size={14} className="mr-1" />
                 Filter by Weaknesses
               </Button>
-              <Button 
+              <Button
                 onClick={handleAnalyzeLosses}
                 size="sm"
                 variant="secondary"
@@ -296,20 +296,20 @@ export default function PartnersView() {
             <Card key={partner.id} className="group relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="icon" size="sm">
-                   <ExternalLink size={16} />
+                  <ExternalLink size={16} />
                 </Button>
               </div>
-              
+
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white">
                   {partner.name.substring(0, 2).toUpperCase()}
                 </div>
                 <Badge>{partner.industry}</Badge>
               </div>
-              
-              <h3 className="text-xl font-bold text-slate-100">{partner.name}</h3>
-              
-              <div className="mt-4 space-y-2 text-sm text-slate-400">
+
+              <h3 className="text-xl font-bold text-slate-800">{partner.name}</h3>
+
+              <div className="mt-4 space-y-2 text-sm text-slate-600">
                 <div className="flex items-center gap-2">
                   <MapPin size={14} className="text-indigo-400" />
                   {partner.location}
@@ -327,7 +327,7 @@ export default function PartnersView() {
                   </span>
                 ))}
               </div>
-              
+
               <Button className="w-full mt-6 bg-slate-800 hover:bg-slate-700">
                 Connect
               </Button>

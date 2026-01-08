@@ -15,8 +15,24 @@ export default function PitchDeckView() {
 
   const [profile, setProfile] = useState<any>(null);
   useEffect(() => {
-    const saved = localStorage.getItem('startupProfile');
-    if (saved) setProfile(JSON.parse(saved));
+    // Fetch from persistent storage instead of localStorage
+    fetch('/api/get-inquiry')
+      .then(res => res.json())
+      .then(data => {
+        const profileData = Array.isArray(data) ? data[0] : data;
+        if (profileData && !profileData.error) {
+          setProfile(profileData);
+        } else {
+          // Fallback to localStorage if API fails
+          const saved = localStorage.getItem('startupProfile');
+          if (saved) setProfile(JSON.parse(saved));
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch startup data", err);
+        const saved = localStorage.getItem('startupProfile');
+        if (saved) setProfile(JSON.parse(saved));
+      });
   }, []);
 
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
@@ -188,23 +204,45 @@ export default function PitchDeckView() {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-      // 1. Generate Script
-      // Using gemini-3-flash-preview as requested
+      // Build a rich context from the actual startup profile
+      const contextDetails = profile ? `
+Company: ${profile.name}
+Industry: ${profile.industry}
+Description: ${profile.description}
+Problem: ${profile.problem}
+Solution: ${profile.solution}
+Target Audience: ${profile.targetAudience}
+Revenue Model: ${profile.revenueModel}
+Pricing Strategy: ${profile.pricingStrategy}
+Stage: ${profile.stage}
+Team Size: ${profile.teamSize}
+Funding History: ${profile.fundingHistory}
+Fundraising Goals: ${profile.fundraisingGoals}
+Competitors: ${profile.competitors}
+TAM: ${profile.metrics?.tam}
+SAM: ${profile.metrics?.sam}
+SOM: ${profile.metrics?.som}
+` : prompt;
+
+      // 1. Generate Script with rich context
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
           parts: [{
-            text: `Act as a startup founder. Write a 5-slide pitch deck script for: "${prompt}".
-          Structure required:
-          Slide 1: Title & Tagline
-          Slide 2: The Problem
-          Slide 3: The Solution
-          Slide 4: Market Size
-          Slide 5: Business Model
+            text: `Act as a startup founder. Write a compelling 5-slide pitch deck script based on this startup profile:
 
-          For each slide, provide:
-          - Content (Bullet points)
-          - Speaker Notes` }]
+${contextDetails}
+
+Structure required:
+Slide 1: Title & Tagline (Company name, powerful tagline based on their solution)
+Slide 2: The Problem (Use the actual problem statement from the profile)
+Slide 3: The Solution (Use the actual solution from the profile)
+Slide 4: Market Size (Use TAM/SAM/SOM metrics from the profile)  
+Slide 5: Business Model & Ask (Use revenue model, pricing, and fundraising goals)
+
+For each slide, provide:
+- Content (Bullet points based on actual data)
+- Speaker Notes (Professional pitch language)` }]
         }
       });
 
@@ -222,54 +260,57 @@ export default function PitchDeckView() {
         handleGenerateSlideImages(slides);
 
         // Generate Veo video and audio
-        handleGenerateVeoMedia(scriptText, prompt);
+        handleGenerateVeoMedia(scriptText, profile?.name || prompt);
       } else {
         throw new Error("Empty response");
       }
 
       // 2. Trigger Assets if they don't exist
       if (!logoUrl && !isGeneratingLogo) {
-        handleGenerateLogo(prompt);
+        handleGenerateLogo(profile?.name || prompt);
       }
 
     } catch (e: any) {
       console.warn("Deck Generation API throttled or failed, using smart fallback.", e);
 
-      // Smart Fallback using Profile Data
+      // Smart Fallback using ACTUAL Profile Data
       const fallbackScript = `Slide 1: ${profile?.name || 'Your Startup'} - Vision
-Title: Revolutionizing the ${profile?.industry || 'Tech'} Industry
-- Tagline: "The Future of ${profile?.industry || 'Innovation'} is Here"
-- Presenter: Founder Team
+Title: ${profile?.name || 'Company Name'}
+- Tagline: "${profile?.solution ? profile.solution.substring(0, 60) : 'The Future of Innovation is Here'}"
+- Industry: ${profile?.industry || 'Technology'}
+- Stage: ${profile?.stage || 'Early Stage'}
 
-Speaker Notes: "Hi everyone, we are ${profile?.name || 'our company'}, and we are here to change how you think about ${profile?.industry || 'this market'}."
+Speaker Notes: "Hi everyone, we are ${profile?.name || 'our company'}. We're transforming the ${profile?.industry || 'technology'} industry with our innovative solution."
 
 Slide 2: The Problem
-- Current solutions in ${profile?.industry || 'the market'} are slow and expensive.
-- Customers face specific pain points: lack of transparency, high fees.
-- The "Expectation Gap": Users want more than what is currently offered.
+- ${profile?.problem || 'Current solutions in the market are slow and expensive.'}
+- Target Audience Pain Points: ${profile?.targetAudience || 'Early adopters'} face significant challenges.
+- Market Gap: Existing solutions don't meet modern expectations.
 
-Speaker Notes: "We identified three critical gaps that hold the industry back..."
+Speaker Notes: "We identified a critical problem: ${profile?.problem || 'the industry is ready for disruption'}."
 
-Slide 3: The Solution - ${profile?.description ? 'Our Platform' : 'What We Built'}
-- ${profile?.description || 'An AI-powered integrated platform.'}
-- Key Benefit A: 10x faster processing.
-- Key Benefit B: Seamless user experience.
+Slide 3: The Solution - ${profile?.name || 'Our Platform'}
+- ${profile?.solution || 'An AI-powered integrated platform.'}
+- ${profile?.description || 'Comprehensive solution for modern needs.'}
+- Key Differentiator: ${profile?.pricingStrategy || 'Competitive pricing with premium value.'}
 
-Speaker Notes: "Our solution isn't just an improvement; it's a paradigm shift."
+Speaker Notes: "Our solution directly addresses these pain points. ${profile?.solution || 'We built what the market truly needs.'}"
 
 Slide 4: Market Opportunity
-- Total Addressable Market (TAM): $50B+
-- Serviceable Available Market (SAM): $12B
+- Total Addressable Market (TAM): ${profile?.metrics?.tam || '$50B+'}
+- Serviceable Available Market (SAM): ${profile?.metrics?.sam || '$12B'}
+- Serviceable Obtainable Market (SOM): ${profile?.metrics?.som || '$1B'}
 - Target Audience: ${profile?.targetAudience || 'Early Adopters & SMBs'}
 
-Speaker Notes: "The market is ripe for disruption, and we are positioned to capture signficant share."
+Speaker Notes: "The market opportunity is massive. Our TAM is ${profile?.metrics?.tam || 'in the billions'}, and we're positioned to capture significant share."
 
 Slide 5: Business Model & Ask
-- Revenue Streams: Subscription (SaaS) & Transaction Fees.
-- Milestone: Reaching $1M ARR within 18 months.
-- The Ask: Raising Pre-Seed round to accelerate growth.
+- Revenue Model: ${profile?.revenueModel || 'SaaS Subscription'}
+- Team: ${profile?.teamSize || 'Growing'} members
+- Funding History: ${profile?.fundingHistory || 'Pre-seed'}
+- The Ask: ${profile?.fundraisingGoals || 'Raising to accelerate growth'}
 
-Speaker Notes: "We have a clear path to profitability and are inviting you to join us."`;
+Speaker Notes: "We have a clear path to profitability. We're raising ${profile?.fundraisingGoals || 'our next round'} to accelerate growth and market capture."`;
 
       setDeckScript(fallbackScript);
       setHasGeneratedDeck(true);
@@ -279,7 +320,7 @@ Speaker Notes: "We have a clear path to profitability and are inviting you to jo
       const slides = parseSlideScript(cleanedScript);
       setParsedSlides(slides);
       handleGenerateSlideImages(slides);
-      handleGenerateVeoMedia(fallbackScript, prompt);
+      handleGenerateVeoMedia(fallbackScript, profile?.name || prompt);
     } finally {
       setIsGeneratingDeck(false);
     }
@@ -571,11 +612,10 @@ Make it production-ready and visually appealing!`
                   <div
                     key={slideNum}
                     onClick={() => setCurrentSlide(slideNum)}
-                    className={`aspect-video bg-white rounded-md border-2 ${
-                      isActive
-                        ? 'border-indigo-500 shadow-lg ring-2 ring-indigo-200 scale-105'
-                        : 'border-slate-200'
-                    } hover:border-indigo-400 hover:shadow-md cursor-pointer transition-all p-1 flex flex-col justify-between overflow-hidden`}
+                    className={`aspect-video bg-white rounded-md border-2 ${isActive
+                      ? 'border-indigo-500 shadow-lg ring-2 ring-indigo-200 scale-105'
+                      : 'border-slate-200'
+                      } hover:border-indigo-400 hover:shadow-md cursor-pointer transition-all p-1 flex flex-col justify-between overflow-hidden`}
                   >
                     {hasImage ? (
                       <img

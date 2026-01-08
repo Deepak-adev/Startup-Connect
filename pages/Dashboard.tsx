@@ -2,40 +2,48 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DynamicWorkspace from '../components/DynamicWorkspace';
 import AGUIChat from '../components/AGUIChat';
-import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu, Target } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu, Target, Briefcase } from 'lucide-react';
 import { ViewType } from '../types';
 import { cn } from '../components/ui';
 
 export default function Dashboard() {
     const [searchParams, setSearchParams] = useSearchParams();
     const currentView = searchParams.get('view') || ViewType.DASHBOARD;
-    const [startupData, setStartupData] = React.useState<any>(null);
+    const isInvestor = currentView.startsWith('investor');
+    const [contextData, setContextData] = React.useState<any>(null);
 
     React.useEffect(() => {
-        fetch('/api/get-inquiry')
+        // Fetch appropriate data based on role
+        const endpoint = isInvestor ? '/api/get-investor' : '/api/get-inquiry';
+
+        fetch(endpoint)
             .then(res => res.json())
             .then(data => {
-                // Handle array format: extract first element
                 const profile = Array.isArray(data) ? data[0] : data;
                 if (profile && !profile.error) {
-                    setStartupData(profile);
+                    setContextData(profile);
                 } else {
-                    // No data found, maybe redirect or just load generic
-                    console.log("No startup data found, using generic context");
-                    setStartupData({ name: "Your Startup", industry: "General", description: "A new venture." });
+                    console.log(`No ${isInvestor ? 'investor' : 'startup'} data found, using generic context`);
+                    setContextData(isInvestor
+                        ? { name: "Your Fund", type: "Investor", thesis: "Investing in promising ventures." }
+                        : { name: "Your Startup", industry: "General", description: "A new venture." }
+                    );
                 }
             })
             .catch(err => {
-                console.error("Failed to load startup data", err);
-                setStartupData({ name: "Your Startup", industry: "General", description: "A new venture." });
+                console.error("Failed to load context data", err);
+                setContextData(isInvestor
+                    ? { name: "Your Fund", type: "Investor", thesis: "Investing in promising ventures." }
+                    : { name: "Your Startup", industry: "General", description: "A new venture." }
+                );
             });
-    }, []);
+    }, [isInvestor]);
 
-    const navItems = currentView.startsWith('investor_') ? [
-        { id: ViewType.INVESTOR_DASHBOARD, label: 'Overview', icon: LayoutDashboard },
-        { id: ViewType.INVESTOR_DEAL_FLOW, label: 'Deal Flow', icon: Target },
-        { id: ViewType.INVESTOR_PORTFOLIO, label: 'Portfolio', icon: PieChart },
-        { id: ViewType.INVESTOR_REPORTS, label: 'Reports', icon: Presentation },
+    const navItems = isInvestor ? [
+        { id: 'investor_dashboard' as ViewType, label: 'Overview', icon: LayoutDashboard },
+        { id: 'investor_deal_flow' as ViewType, label: 'Deal Flow', icon: Target },
+        { id: 'investor_portfolio' as ViewType, label: 'Portfolio', icon: Briefcase },
+        { id: 'investor_reports' as ViewType, label: 'Reports', icon: PieChart },
     ] : [
         { id: ViewType.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
         { id: ViewType.PARTNERS, label: 'Partners', icon: Users },
@@ -44,70 +52,96 @@ export default function Dashboard() {
         { id: ViewType.PITCH_DECK, label: 'Pitch Deck', icon: Presentation },
     ];
 
-    const handleNavClick = (view: ViewType) => {
-        setSearchParams({ view });
+    const handleNavClick = (view: ViewType | string) => {
+        setSearchParams({ view: view as string });
     };
 
-    const systemInstruction = startupData ? `
-You are AGUI, the AI assistant for "Startup Connect".
-You are currently assisting the startup: "${startupData.name}".
+    // Dynamic system instruction based on role
+    const systemInstruction = contextData ? (isInvestor ? `
+You are AGUI, the AI assistant for investors on "Startup Connect".
+You are currently assisting: "${contextData.name}".
 
-Context about this startup:
-- Industry: ${startupData.industry}
-- Description: ${startupData.description}
-- Problem/Solution: ${startupData.problem} / ${startupData.solution}
-- Target Audience: ${startupData.targetAudience}
-- Stage: ${startupData.stage}
-- Key Metrics: TAM=${startupData.metrics?.tam}, SAM=${startupData.metrics?.sam}
+Context about this investor:
+- Type: ${contextData.type}
+- Investment Thesis: ${contextData.thesis}
+- Preferred Stages: ${contextData.preferredStages || 'Various'}
+- Target Industries: ${contextData.industries?.join(', ') || 'Various'}
+- Ticket Size: ${contextData.ticketSize?.min || 'N/A'} - ${contextData.ticketSize?.max || 'N/A'}
+- Geographic Focus: ${contextData.geographicFocus || 'Global'}
 
-Your goal is to translate user intent into structured JSON actions to drive the React UI, while keeping this context in mind.
-When the user asks for partners, analysis, or pitch decks, use the specific details of this startup to tailor your response.
+Your goal is to help this investor discover startups, analyze deal flow, and manage their portfolio.
 
-**The "Steering Wheel" (URL Schema)**
-You drive the website by outputting a JSON object.
-
-**A. Supported Views (view parameter)**
-- 'dashboard': Main hub, metrics, loan status.
-- 'partners': Collaboration matching table.
-- 'market_analysis': Charts and research.
-- 'startup_sale': Exit strategy and valuation.
-- 'pitch_deck': Deck creation tool.
-- 'website_preview': Website generation preview.
-
-**B. Supported Filters (params)**
-- industry: string
-- funding_min: number
-- profit_status: 'profit' | 'loss' | 'break_even'
-- q: search query string
-- action: 'trigger_veo_video' | 'trigger_imagen_logo' | 'generate_deck' | 'generate_website'
-- websiteId: string (for website preview)
+**Supported Views (view parameter)**
+- 'investor_dashboard': Overview and key metrics.
+- 'investor_deal_flow': Browse and filter startups.
+- 'investor_portfolio': View invested companies.
+- 'investor_reports': Analytics and reports.
 
 **Operational Rules**
-1. Intent First: If user wants to see partners, navigate there immediately.
-2. Silent Driving: Output JSON cleanly. 
-3. Missing Info: Default to a logical view.
+1. When the user asks to see startups or deals, navigate to deal_flow.
+2. Keep responses concise and professional.
+3. Use the investor's thesis to recommend relevant startups.
 
 **Response Format (JSON ONLY)**
 {
   "thought": "Internal reasoning...",
   "navigation": {
     "path": "/app", 
-    "params": {
-      "view": "partners",
-      "industry": "${startupData.industry}"
-    }
+    "params": { "view": "investor_deal_flow" }
   },
   "message": "User facing message..."
 }
-` : undefined;
+` : `
+You are AGUI, the AI assistant for "Startup Connect".
+You are currently assisting the startup: "${contextData.name}".
+
+Context about this startup:
+- Industry: ${contextData.industry}
+- Description: ${contextData.description}
+- Problem/Solution: ${contextData.problem} / ${contextData.solution}
+- Target Audience: ${contextData.targetAudience}
+- Stage: ${contextData.stage}
+- Key Metrics: TAM=${contextData.metrics?.tam}, SAM=${contextData.metrics?.sam}
+
+Your goal is to translate user intent into structured JSON actions to drive the React UI.
+
+**Supported Views (view parameter)**
+- 'dashboard': Main hub, metrics, loan status.
+- 'partners': Collaboration matching table.
+- 'market_analysis': Charts and research.
+- 'startup_sale': Exit strategy and valuation.
+- 'pitch_deck': Deck creation tool.
+
+**Response Format (JSON ONLY)**
+{
+  "thought": "Internal reasoning...",
+  "navigation": {
+    "path": "/app", 
+    "params": { "view": "partners", "industry": "${contextData.industry}" }
+  },
+  "message": "User facing message..."
+}
+`) : undefined;
+
+    const initialMessage = contextData ? (isInvestor
+        ? `Welcome back! I'm ready to help with ${contextData.name}. We can explore deal flow, analyze your portfolio, or find startups matching your thesis in ${contextData.industries?.join(', ') || 'your target sectors'}.`
+        : `Welcome back! I'm ready to help with ${contextData.name}. We can look for partners in ${contextData.industry}, analyze your market, or create a pitch deck.`
+    ) : undefined;
 
     return (
         <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
             {/* Sidebar - Desktop */}
             <aside className="hidden md:flex flex-col w-20 lg:w-64 border-r border-slate-200 bg-white shadow-sm z-20">
                 <div className="p-6 flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex-shrink-0" />
-                    <span className="font-display font-bold text-lg tracking-tight hidden lg:block text-slate-900">Startup Connect</span>
+                    <div className={cn(
+                        "h-8 w-8 rounded-lg flex-shrink-0",
+                        isInvestor
+                            ? "bg-gradient-to-tr from-emerald-500 to-teal-500"
+                            : "bg-gradient-to-tr from-indigo-500 to-pink-500"
+                    )} />
+                    <span className="font-display font-bold text-lg tracking-tight hidden lg:block text-slate-900">
+                        {isInvestor ? 'Investor Hub' : 'Startup Connect'}
+                    </span>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -118,11 +152,17 @@ You drive the website by outputting a JSON object.
                             className={cn(
                                 "flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-all duration-200 group",
                                 currentView === item.id
-                                    ? "bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm"
+                                    ? isInvestor
+                                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm"
+                                        : "bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm"
                                     : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                             )}
                         >
-                            <item.icon size={20} className={cn(currentView === item.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600")} />
+                            <item.icon size={20} className={cn(
+                                currentView === item.id
+                                    ? isInvestor ? "text-emerald-600" : "text-indigo-600"
+                                    : "text-slate-400 group-hover:text-slate-600"
+                            )} />
                             <span className="hidden lg:block font-medium">{item.label}</span>
                         </button>
                     ))}
@@ -130,8 +170,12 @@ You drive the website by outputting a JSON object.
 
                 <div className="p-4 border-t border-slate-100">
                     <div className="rounded-xl bg-slate-50 p-4 border border-slate-200 hidden lg:block">
-                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Current Balance</p>
-                        <p className="text-xl font-mono font-bold text-slate-900">$24,500.00</p>
+                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">
+                            {isInvestor ? 'Portfolio Value' : 'Current Balance'}
+                        </p>
+                        <p className="text-xl font-mono font-bold text-slate-900">
+                            {isInvestor ? '$2.4M' : '$24,500.00'}
+                        </p>
                     </div>
                 </div>
             </aside>
@@ -153,16 +197,21 @@ You drive the website by outputting a JSON object.
 
                 {/* Panel B: AGUI Chat */}
                 <div className="h-1/2 md:h-full md:flex-1 border-t md:border-t-0 md:border-l border-slate-200 shadow-xl z-10 relative">
-                    {startupData ? (
+                    {contextData ? (
                         <AGUIChat
                             systemInstruction={systemInstruction}
-                            initialMessage={`Welcome back! I'm ready to help with ${startupData.name}. We can look for partners in ${startupData.industry}, analyze your market, or create a pitch deck.`}
+                            initialMessage={initialMessage}
                         />
                     ) : (
                         <div className="flex h-full items-center justify-center bg-white">
                             <div className="flex flex-col items-center gap-2">
-                                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-                                <p className="text-sm font-medium text-slate-500">Loading your startup context...</p>
+                                <div className={cn(
+                                    "h-8 w-8 animate-spin rounded-full border-4 border-t-transparent",
+                                    isInvestor ? "border-emerald-600" : "border-indigo-600"
+                                )}></div>
+                                <p className="text-sm font-medium text-slate-500">
+                                    Loading your {isInvestor ? 'investor' : 'startup'} context...
+                                </p>
                             </div>
                         </div>
                     )}

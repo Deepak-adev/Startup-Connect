@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Unknown",
+    "type": "VC",
+    "thesis": "Late stage AI and fintech startups",
+    "preferredStages": "Late Stage",
+    "industries": [
+      "AI",
+      "Fintech"
+    ],
+    "geographicFocus": "Unspecified",
+    "ticketSize": {
+      "min": "Unknown",
+      "max": "Unknown"
+    },
+    "followOnPolicy": "Unknown",
+    "valueAdd": "Unknown",
+    "fundSize": "Unknown",
+    "dealFlowVolume": "Unknown",
+    "coInvestmentPreferences": "Unknown"
+  }
+]

@@ -40,11 +40,11 @@ export default function LossAnalysis({ analysis, onSolutionsClick }: LossAnalysi
   return (
     <div className="space-y-6">
       {/* Overview Card */}
-      <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700">
+      <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-bold text-white mb-2">{analysis.name}</h3>
-            <div className="flex items-center gap-4 text-sm text-slate-400">
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{analysis.name}</h3>
+            <div className="flex items-center gap-4 text-sm text-slate-600">
               <span>{analysis.industry}</span>
               <span>•</span>
               <span>{analysis.timeInBusiness} years in business</span>
@@ -63,22 +63,22 @@ export default function LossAnalysis({ analysis, onSolutionsClick }: LossAnalysi
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-slate-800/50 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-1">Current Revenue</div>
-            <div className="text-xl font-bold text-white">
+          <div className="bg-slate-100 rounded-lg p-4">
+            <div className="text-sm text-slate-600 mb-1">Current Revenue</div>
+            <div className="text-xl font-bold text-slate-900">
               ${analysis.currentRevenue.toLocaleString()}
             </div>
           </div>
-          <div className="bg-slate-800/50 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-1">Target Revenue</div>
-            <div className="text-xl font-bold text-green-400">
+          <div className="bg-slate-100 rounded-lg p-4">
+            <div className="text-sm text-slate-600 mb-1">Target Revenue</div>
+            <div className="text-xl font-bold text-green-600">
               ${analysis.targetRevenue.toLocaleString()}
             </div>
           </div>
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-medium text-slate-300">Operational Challenges</div>
+          <div className="text-sm font-medium text-slate-700">Operational Challenges</div>
           <div className="flex flex-wrap gap-2">
             {analysis.operationalChallenges.map((challenge, index) => (
               <Badge key={index} variant="default">
@@ -91,36 +91,36 @@ export default function LossAnalysis({ analysis, onSolutionsClick }: LossAnalysi
 
       {/* Loss Reasons */}
       <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Identified Loss Reasons</h4>
+        <h4 className="text-lg font-semibold text-slate-900">Identified Loss Reasons</h4>
         <div className="space-y-3">
           {analysis.lossReasons.map((reason) => (
-            <Card key={reason.id} className="border-slate-700">
+            <Card key={reason.id} className="border-slate-200">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 mt-1">
                   {getCategoryIcon(reason.category)}
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h5 className="font-semibold text-white capitalize">{reason.category}</h5>
+                    <h5 className="font-semibold text-slate-900 capitalize">{reason.category}</h5>
                     <Badge className={getSeverityColor(reason.severity)}>
                       {reason.severity}
                     </Badge>
                   </div>
-                  
-                  <p className="text-slate-300 mb-3">{reason.description}</p>
-                  
-                  <div className="bg-slate-800/50 rounded-lg p-3 mb-3">
-                    <div className="text-xs text-slate-400 mb-1">Impact</div>
-                    <div className="text-sm text-slate-200">{reason.impact}</div>
+
+                  <p className="text-slate-700 mb-3">{reason.description}</p>
+
+                  <div className="bg-slate-100 rounded-lg p-3 mb-3">
+                    <div className="text-xs text-slate-600 mb-1">Impact</div>
+                    <div className="text-sm text-slate-800">{reason.impact}</div>
                   </div>
 
                   <div className="space-y-2">
-                    <div className="text-xs text-slate-400">Recommended Solutions</div>
+                    <div className="text-xs text-slate-600">Recommended Solutions</div>
                     <div className="space-y-1">
                       {reason.solutions.map((solution, index) => (
-                        <div key={index} className="text-sm text-slate-300 flex items-start gap-2">
-                          <CheckCircle size={14} className="text-green-400 flex-shrink-0 mt-0.5" />
+                        <div key={index} className="text-sm text-slate-700 flex items-start gap-2">
+                          <CheckCircle size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
                           {solution}
                         </div>
                       ))}
@@ -128,9 +128,9 @@ export default function LossAnalysis({ analysis, onSolutionsClick }: LossAnalysi
                   </div>
 
                   {onSolutionsClick && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="mt-4"
                       onClick={() => onSolutionsClick(reason.id)}
                     >

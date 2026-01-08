@@ -1,41 +1,74 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AGUIChat from '../components/AGUIChat';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { generateInvestorProfileFromChat } from '../services/geminiService';
+import { ChatMessage } from '../types';
 
 export default function InvestorInquiry() {
     const navigate = useNavigate();
     const [step, setStep] = useState<'register' | 'chat'>('register');
     const [regData, setRegData] = useState({ email: '', password: '' });
     const [canProceed, setCanProceed] = useState(false);
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-    // In a real app, AGUIChat would communicate up when enough info is gathered
-    // For demo, we'll allow skipping or proceeding after some interaction
     useEffect(() => {
         if (step === 'chat') {
-            // Simulate analyzing...
             const timer = setTimeout(() => setCanProceed(true), 5000);
             return () => clearTimeout(timer);
         }
     }, [step]);
 
-    const handleComplete = () => {
-        // In a real app, we would parse the 'messages' to extract structured data.
-        // For now, we'll save a flag or generic profile.
-        const mockInvestorProfile = {
-            name: "Venture Capital Partners",
-            type: "VC Firm",
-            thesis: "Investing in early-stage AI and GreenTech startups.",
-            ticketSize: { min: 100000, max: 2000000 },
-            industries: ["AI", "GreenTech", "SaaS"]
-        };
-        localStorage.setItem('investorProfile', JSON.stringify(mockInvestorProfile));
-        navigate('/app?view=investor_dashboard');
+    const handleAnalysisComplete = async (data: any) => {
+        try {
+            await fetch('/api/save-investor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            localStorage.setItem('investorProfile', JSON.stringify(data));
+            navigate('/app?view=investor_dashboard');
+        } catch (error) {
+            console.error('Failed to save investor inquiry:', error);
+            localStorage.setItem('investorProfile', JSON.stringify(data));
+            navigate('/app?view=investor_dashboard');
+        }
+    };
+
+    const handleComplete = async () => {
+        setIsAnalyzing(true);
+        try {
+            if (chatMessages.length > 2) {
+                const extractedProfile = await generateInvestorProfileFromChat(chatMessages);
+                await handleAnalysisComplete(extractedProfile);
+            } else {
+                const mockInvestorProfile = {
+                    name: "Venture Capital Partners",
+                    type: "VC Firm",
+                    thesis: "Investing in early-stage AI and GreenTech startups.",
+                    ticketSize: { min: "$100K", max: "$2M" },
+                    industries: ["AI", "GreenTech", "SaaS"]
+                };
+                await handleAnalysisComplete(mockInvestorProfile);
+            }
+        } catch (error) {
+            console.error("Analysis failed", error);
+            const mockInvestorProfile = {
+                name: "Venture Capital Partners",
+                type: "VC Firm",
+                thesis: "Investing in early-stage AI and GreenTech startups.",
+                ticketSize: { min: "$100K", max: "$2M" },
+                industries: ["AI", "GreenTech", "SaaS"]
+            };
+            await handleAnalysisComplete(mockInvestorProfile);
+        } finally {
+            setIsAnalyzing(false);
+        }
     };
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would normally register the user
         setStep('chat');
     };
 
@@ -45,10 +78,20 @@ export default function InvestorInquiry() {
                 <div className="absolute top-4 right-4 z-50">
                     <button
                         onClick={handleComplete}
-                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-indigo-600 font-medium shadow-sm transition-all"
+                        disabled={isAnalyzing}
+                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-emerald-600 font-medium shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <span>Complete Profile</span>
-                        <ArrowRight className="w-4 h-4" />
+                        {isAnalyzing ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Analyzing...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Complete Profile</span>
+                                <ArrowRight className="w-4 h-4" />
+                            </>
+                        )}
                     </button>
                 </div>
             )}
@@ -73,7 +116,7 @@ export default function InvestorInquiry() {
                                     required
                                     value={regData.email}
                                     onChange={(e) => setRegData({ ...regData, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none transition-all"
                                     placeholder="investor@fund.com"
                                 />
                             </div>
@@ -84,7 +127,7 @@ export default function InvestorInquiry() {
                                     required
                                     value={regData.password}
                                     onChange={(e) => setRegData({ ...regData, password: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none transition-all"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -98,10 +141,11 @@ export default function InvestorInquiry() {
                         </form>
                     </div>
                 ) : (
-                    /* Full Screen Chat Interface */
                     <div className="flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 bg-white min-h-0 flex flex-col">
                         <AGUIChat
                             fullScreenMode={true}
+                            onAnalysisComplete={handleAnalysisComplete}
+                            onMessagesChange={setChatMessages}
                             initialMessage="Welcome Partner. To tailor the deal flow to your needs, I need to understand your investment criteria. What is your primary investment thesis?"
                             systemInstruction={`
 You are AGUI, an expert investment analyst assisting a new investor onboarding.
@@ -127,12 +171,27 @@ Topics to Cover (Ask one by one):
 Once you have gathered sufficient data points (at least 6-8), output a JSON with:
   message: "Thank you. I have calibrated your deal flow engine. Redirecting you to your dashboard to view matches..."
   navigation: { path: "/app", params: { view: "investor_dashboard" } }
+  data: {
+    name: "Investor/Fund Name",
+    type: "Type (Angel, VC, etc.)",
+    thesis: "Investment thesis",
+    preferredStages: "...",
+    industries: ["Array of industries"],
+    geographicFocus: "...",
+    ticketSize: { min: "...", max: "..." },
+    followOnPolicy: "...",
+    valueAdd: "...",
+    fundSize: "...",
+    dealFlowVolume: "...",
+    coInvestmentPreferences: "..."
+  }
 
 Response Format (JSON ONLY):
 {
   "thought": "Reasoning...",
   "message": "Your next single question...",
-  "navigation": null
+  "navigation": null,
+  "data": null
 }
 `}
                         />
