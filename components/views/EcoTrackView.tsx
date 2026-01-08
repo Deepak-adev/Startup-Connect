@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button } from '../ui';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Users, 
+import {
+  DollarSign,
+  TrendingUp,
+  Users,
   Calendar,
   AlertTriangle,
   CheckCircle,
@@ -13,20 +13,22 @@ import {
   RefreshCw,
   Filter,
   Search,
-  Eye
+  Eye,
+  Activity,
+  Layers
 } from 'lucide-react';
-import { 
-  FundingStatus, 
-  LoanDisbursement, 
-  OutstandingPayment, 
-  MarketSizeAnalysis, 
-  EcoTrackMetrics 
+import {
+  FundingStatus,
+  LoanDisbursement,
+  OutstandingPayment,
+  MarketSizeAnalysis,
+  EcoTrackMetrics
 } from '../../types';
-import { 
-  MOCK_FUNDING_STATUS, 
-  MOCK_LOAN_DISBURSEMENTS, 
-  MOCK_OUTSTANDING_PAYMENTS, 
-  MOCK_MARKET_ANALYSIS, 
+import {
+  MOCK_FUNDING_STATUS,
+  MOCK_LOAN_DISBURSEMENTS,
+  MOCK_OUTSTANDING_PAYMENTS,
+  MOCK_MARKET_ANALYSIS,
   MOCK_ECOTRACK_METRICS,
   formatCurrency,
   formatPercentage
@@ -78,105 +80,105 @@ export default function EcoTrackView() {
   };
 
   const filteredData = {
-    funding: fundingStatus.filter(f => 
+    funding: fundingStatus.filter(f =>
       f.startupName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       f.status.toLowerCase().includes(searchQuery.toLowerCase())
     ),
-    loans: loanDisbursements.filter(l => 
+    loans: loanDisbursements.filter(l =>
       l.lender.toLowerCase().includes(searchQuery.toLowerCase()) ||
       l.status.toLowerCase().includes(searchQuery.toLowerCase())
     ),
-    payments: outstandingPayments.filter(p => 
+    payments: outstandingPayments.filter(p =>
       p.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.paymentType.toLowerCase().includes(searchQuery.toLowerCase())
     ),
-    markets: marketAnalysis.filter(m => 
+    markets: marketAnalysis.filter(m =>
       m.industry.toLowerCase().includes(searchQuery.toLowerCase())
     )
   };
 
   const getMetricCardColor = (label: string) => {
     switch (label) {
-      case 'totalStartups': return 'from-blue-500/10 to-blue-600/10 border-blue-500/20';
-      case 'activeFunding': return 'from-green-500/10 to-green-600/10 border-green-500/20';
-      case 'totalDisbursed': return 'from-purple-500/10 to-purple-600/10 border-purple-500/20';
-      case 'outstandingPayments': return 'from-orange-500/10 to-orange-600/10 border-orange-500/20';
-      case 'marketGrowth': return 'from-indigo-500/10 to-indigo-600/10 border-indigo-500/20';
-      case 'repaymentRate': return 'from-teal-500/10 to-teal-600/10 border-teal-500/20';
-      default: return 'from-slate-500/10 to-slate-600/10 border-slate-500/20';
+      case 'totalStartups': return 'text-blue-600 bg-blue-50 border-blue-100';
+      case 'activeFunding': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+      case 'totalDisbursed': return 'text-purple-600 bg-purple-50 border-purple-100';
+      case 'outstandingPayments': return 'text-amber-600 bg-amber-50 border-amber-100';
+      case 'marketGrowth': return 'text-indigo-600 bg-indigo-50 border-indigo-100';
+      case 'repaymentRate': return 'text-teal-600 bg-teal-50 border-teal-100';
+      default: return 'text-slate-600 bg-slate-50 border-slate-100';
     }
   };
 
   const renderMetricsOverview = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card className={`bg-gradient-to-br ${getMetricCardColor('totalStartups')}`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-500/20">
-            <Users size={20} className="text-blue-400" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Card className="border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] bg-white rounded-3xl p-6 hover:-translate-y-1 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-blue-50 text-blue-600">
+            <Users size={24} />
           </div>
           <div>
-            <div className="text-sm text-slate-400">Total Startups</div>
-            <div className="text-xl font-bold text-white">{metrics.totalStartups}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Startups</div>
+            <div className="text-2xl font-display font-bold text-slate-900">{metrics.totalStartups}</div>
           </div>
         </div>
       </Card>
 
-      <Card className={`bg-gradient-to-br ${getMetricCardColor('activeFunding')}`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-green-500/20">
-            <Target size={20} className="text-green-400" />
+      <Card className="border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] bg-white rounded-3xl p-6 hover:-translate-y-1 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
+            <Target size={24} />
           </div>
           <div>
-            <div className="text-sm text-slate-400">Active Funding</div>
-            <div className="text-xl font-bold text-white">{metrics.activeFunding}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Funding</div>
+            <div className="text-2xl font-display font-bold text-slate-900">{metrics.activeFunding}</div>
           </div>
         </div>
       </Card>
 
-      <Card className={`bg-gradient-to-br ${getMetricCardColor('totalDisbursed')}`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-purple-500/20">
-            <DollarSign size={20} className="text-purple-400" />
+      <Card className="border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] bg-white rounded-3xl p-6 hover:-translate-y-1 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-purple-50 text-purple-600">
+            <DollarSign size={24} />
           </div>
           <div>
-            <div className="text-sm text-slate-400">Total Disbursed</div>
-            <div className="text-xl font-bold text-white">{formatCurrency(metrics.totalDisbursed)}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Disbursed</div>
+            <div className="text-2xl font-display font-bold text-slate-900">{formatCurrency(metrics.totalDisbursed)}</div>
           </div>
         </div>
       </Card>
 
-      <Card className={`bg-gradient-to-br ${getMetricCardColor('outstandingPayments')}`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-orange-500/20">
-            <AlertTriangle size={20} className="text-orange-400" />
+      <Card className="border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] bg-white rounded-3xl p-6 hover:-translate-y-1 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-amber-50 text-amber-600">
+            <AlertTriangle size={24} />
           </div>
           <div>
-            <div className="text-sm text-slate-400">Outstanding Payments</div>
-            <div className="text-xl font-bold text-white">{formatCurrency(metrics.outstandingPayments)}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Outstanding</div>
+            <div className="text-2xl font-display font-bold text-slate-900">{formatCurrency(metrics.outstandingPayments)}</div>
           </div>
         </div>
       </Card>
 
-      <Card className={`bg-gradient-to-br ${getMetricCardColor('marketGrowth')}`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-indigo-500/20">
-            <TrendingUp size={20} className="text-indigo-400" />
+      <Card className="border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] bg-white rounded-3xl p-6 hover:-translate-y-1 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600">
+            <TrendingUp size={24} />
           </div>
           <div>
-            <div className="text-sm text-slate-400">Market Growth</div>
-            <div className="text-xl font-bold text-white">{formatPercentage(metrics.marketGrowth)}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Market Growth</div>
+            <div className="text-2xl font-display font-bold text-slate-900">{formatPercentage(metrics.marketGrowth)}</div>
           </div>
         </div>
       </Card>
 
-      <Card className={`bg-gradient-to-br ${getMetricCardColor('repaymentRate')}`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-teal-500/20">
-            <CheckCircle size={20} className="text-teal-400" />
+      <Card className="border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] bg-white rounded-3xl p-6 hover:-translate-y-1 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-teal-50 text-teal-600">
+            <CheckCircle size={24} />
           </div>
           <div>
-            <div className="text-sm text-slate-400">Repayment Rate</div>
-            <div className="text-xl font-bold text-white">{formatPercentage(metrics.repaymentRate)}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Repayment Rate</div>
+            <div className="text-2xl font-display font-bold text-slate-900">{formatPercentage(metrics.repaymentRate)}</div>
           </div>
         </div>
       </Card>
@@ -189,8 +191,8 @@ export default function EcoTrackView() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Funding Status</h2>
-              <Badge variant="default">{filteredData.funding.length} Active</Badge>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Funding Status</h2>
+              <Badge variant="default" className="bg-slate-900">{filteredData.funding.length} Active</Badge>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredData.funding.map(funding => (
@@ -208,8 +210,8 @@ export default function EcoTrackView() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Loan Disbursements</h2>
-              <Badge variant="default">{filteredData.loans.length} Active</Badge>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Loan Disbursements</h2>
+              <Badge variant="default" className="bg-slate-900">{filteredData.loans.length} Active</Badge>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredData.loans.map(loan => (
@@ -227,8 +229,8 @@ export default function EcoTrackView() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Outstanding Payments</h2>
-              <Badge variant="default">{filteredData.payments.length} Pending</Badge>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Outstanding Payments</h2>
+              <Badge variant="default" className="bg-slate-900">{filteredData.payments.length} Pending</Badge>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredData.payments.map(payment => (
@@ -247,8 +249,8 @@ export default function EcoTrackView() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Market Analysis</h2>
-              <Badge variant="default">{filteredData.markets.length} Industries</Badge>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Market Analysis</h2>
+              <Badge variant="default" className="bg-slate-900">{filteredData.markets.length} Industries</Badge>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredData.markets.map(market => (
@@ -264,40 +266,52 @@ export default function EcoTrackView() {
 
       default:
         return (
-          <div className="space-y-6">
+          <div className="space-y-8 animate-in fade-in duration-500">
             {renderMetricsOverview()}
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Recent Funding Activity</h3>
-                <div className="space-y-3">
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="border-slate-200 shadow-sm bg-white rounded-3xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <Activity size={20} className="text-emerald-500" />
+                    Recent Activity
+                  </h3>
+                  <Button variant="ghost" size="sm" className="text-indigo-600 font-bold hover:bg-indigo-50" onClick={() => setViewMode('funding')}>View All</Button>
+                </div>
+                <div className="space-y-4">
                   {fundingStatus.slice(0, 3).map(funding => (
-                    <div key={funding.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                    <div key={funding.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-emerald-200 transition-colors cursor-pointer">
                       <div>
-                        <div className="text-sm font-medium text-white">{funding.startupName}</div>
-                        <div className="text-xs text-slate-400">{funding.status}</div>
+                        <div className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{funding.startupName}</div>
+                        <div className="text-xs font-semibold text-slate-500 uppercase mt-0.5">{funding.status}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium text-white">{formatCurrency(funding.totalRaised)}</div>
-                        <div className="text-xs text-slate-400">{formatPercentage(funding.percentageRaised)}</div>
+                        <div className="text-sm font-bold text-slate-900">{formatCurrency(funding.totalRaised)}</div>
+                        <div className="text-xs font-semibold text-emerald-600">{formatPercentage(funding.percentageRaised)}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </Card>
 
-              <Card className="border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Upcoming Payments</h3>
-                <div className="space-y-3">
+              <Card className="border-slate-200 shadow-sm bg-white rounded-3xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <Clock size={20} className="text-amber-500" />
+                    Upcoming Due
+                  </h3>
+                  <Button variant="ghost" size="sm" className="text-indigo-600 font-bold hover:bg-indigo-50" onClick={() => setViewMode('payments')}>View All</Button>
+                </div>
+                <div className="space-y-4">
                   {outstandingPayments.slice(0, 3).map(payment => (
-                    <div key={payment.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                    <div key={payment.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-amber-200 transition-colors cursor-pointer">
                       <div>
-                        <div className="text-sm font-medium text-white">{payment.recipient}</div>
-                        <div className="text-xs text-slate-400">{payment.paymentType}</div>
+                        <div className="text-sm font-bold text-slate-900 group-hover:text-amber-600 transition-colors">{payment.recipient}</div>
+                        <div className="text-xs font-semibold text-slate-500 uppercase mt-0.5">{payment.paymentType}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium text-white">{formatCurrency(payment.amount)}</div>
-                        <div className="text-xs text-slate-400">{new Date(payment.dueDate).toLocaleDateString()}</div>
+                        <div className="text-sm font-bold text-slate-900">{formatCurrency(payment.amount)}</div>
+                        <div className="text-xs font-semibold text-amber-600">{new Date(payment.dueDate).toLocaleDateString()}</div>
                       </div>
                     </div>
                   ))}
@@ -310,24 +324,24 @@ export default function EcoTrackView() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-700 bg-slate-50/50 min-h-screen pb-10 px-2">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200/60">
         <div>
-          <h1 className="text-3xl font-display font-bold text-white">EcoTrack Dashboard</h1>
-          <p className="text-slate-400 mt-1">
-            Real-time monitoring of funding status, loan disbursals, payments, and market analysis
+          <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">EcoTrack Financials</h1>
+          <p className="text-slate-500 mt-1 text-lg">
+            Real-time monitoring of fund flows, loans, and market sustainability data.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-xs text-slate-400">
-            Last updated: {lastUpdated.toLocaleTimeString()}
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:block">
+            Updated: {lastUpdated.toLocaleTimeString()}
           </div>
           <Button
-            variant="secondary"
+            variant="outline"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 h-11 px-5 rounded-xl border-slate-200 hover:bg-white hover:text-indigo-600 transition-all shadow-sm bg-white"
           >
             <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             Refresh
@@ -336,44 +350,39 @@ export default function EcoTrackView() {
       </div>
 
       {/* View Mode Tabs */}
-      <Card className="border-slate-700">
-        <div className="flex flex-wrap gap-2">
-          {[
-            { id: 'overview', label: 'Overview', icon: BarChart3 },
-            { id: 'funding', label: 'Funding', icon: Target },
-            { id: 'loans', label: 'Loans', icon: DollarSign },
-            { id: 'payments', label: 'Payments', icon: AlertTriangle },
-            { id: 'markets', label: 'Markets', icon: TrendingUp }
-          ].map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setViewMode(id as ViewMode)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                viewMode === id
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+      <div className="flex flex-wrap gap-2 p-1 bg-white/50 backdrop-blur-sm rounded-2xl border border-slate-200/60 w-fit">
+        {[
+          { id: 'overview', label: 'Overview', icon: Layers },
+          { id: 'funding', label: 'Funding', icon: Target },
+          { id: 'loans', label: 'Disbursements', icon: DollarSign },
+          { id: 'payments', label: 'Payments', icon: AlertTriangle },
+          { id: 'markets', label: 'Markets', icon: BarChart3 }
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setViewMode(id as ViewMode)}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${viewMode === id
+                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10 scale-[1.02]'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-white'
               }`}
-            >
-              <Icon size={16} />
-              {label}
-            </button>
-          ))}
-        </div>
-      </Card>
+          >
+            <Icon size={16} />
+            {label}
+          </button>
+        ))}
+      </div>
 
       {/* Search Bar */}
-      <Card className="border-slate-700">
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search startups, lenders, payments, or industries..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-          />
-        </div>
-      </Card>
+      <div className="relative max-w-lg">
+        <Search size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Search across all financial data..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+        />
+      </div>
 
       {/* Main Content */}
       {renderViewModeContent()}

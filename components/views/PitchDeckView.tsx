@@ -1,765 +1,292 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Button, Input } from '../ui';
-import { Play, Video, Image as ImageIcon, Sparkles, Loader2, Download, Globe, ExternalLink } from 'lucide-react';
+import { Card, Button, Badge } from '../ui';
+import {
+  Play, Video, Image as ImageIcon, Sparkles, Loader2, Download, Globe, ExternalLink,
+  FileText, Check, AlertCircle, Layout, Share2, Eye, Edit3
+} from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { WebsiteStorageService } from '../../services/websiteStorage';
 import { parseSlideScript, cleanScript, ParsedSlide } from '../../services/slideParser';
-import { generateSlideImage, SlideImageResponse } from '../../services/imageGeneration';
+import { generateSlideImage, generateSlideImages, SlideImageResponse } from '../../services/imageGeneration';
 import { generatePitchDeckMedia, VideoGenerationResponse } from '../../services/veoGeneration';
+import { generatePitchDeckScript } from '../../services/geminiService';
 
 export default function PitchDeckView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const action = searchParams.get('action');
   const query = searchParams.get('q');
 
+  // State
   const [profile, setProfile] = useState<any>(null);
-  useEffect(() => {
-    // Fetch from persistent storage instead of localStorage
-    fetch('/api/get-inquiry')
-      .then(res => res.json())
-      .then(data => {
-        const profileData = Array.isArray(data) ? data[0] : data;
-        if (profileData && !profileData.error) {
-          setProfile(profileData);
-        } else {
-          // Fallback to localStorage if API fails
-          const saved = localStorage.getItem('startupProfile');
-          if (saved) setProfile(JSON.parse(saved));
-        }
-      })
-      .catch(err => {
-        console.error("Failed to fetch startup data", err);
-        const saved = localStorage.getItem('startupProfile');
-        if (saved) setProfile(JSON.parse(saved));
-      });
-  }, []);
-
-  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-
-  const [isGeneratingLogo, setIsGeneratingLogo] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-
-  const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
-  const [hasGeneratedDeck, setHasGeneratedDeck] = useState(false);
   const [deckScript, setDeckScript] = useState<string>('');
-
   const [parsedSlides, setParsedSlides] = useState<ParsedSlide[]>([]);
   const [slideImages, setSlideImages] = useState<Map<number, string>>(new Map());
-  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(1);
 
-  const [isGeneratingWebsite, setIsGeneratingWebsite] = useState(false);
-  const [generatedWebsiteId, setGeneratedWebsiteId] = useState<string | null>(null);
+  // Loading States
+  const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+  const [isGeneratingVeo, setIsGeneratingVeo] = useState(false);
+  const [veoMedia, setVeoMedia] = useState<any>(null);
 
-  const [veoMedia, setVeoMedia] = useState<{ video?: VideoGenerationResponse; audio?: VideoGenerationResponse } | null>(null);
-  const [isGeneratingVeoMedia, setIsGeneratingVeoMedia] = useState(false);
+  const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+  const [notification, setNotification] = useState<string | null>(null);
 
-  // Auto-fill prompt or context
-  const startupContext = profile ? `${profile.name}: ${profile.description} (Industry: ${profile.industry})` : query || 'New Startup';
-
-  // Trigger Video Gen if URL action demands it
+  // Notification timer
   useEffect(() => {
-    if (action === 'trigger_veo_video' && query && !isGeneratingVideo && !videoUrl) {
-      handleGenerateVideo(query);
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
     }
-  }, [action, query]);
+  }, [notification]);
 
-  // Trigger Logo Gen if URL action demands it
+  // Initial Load
   useEffect(() => {
-    if (action === 'trigger_imagen_logo' && query && !isGeneratingLogo && !logoUrl) {
-      handleGenerateLogo(query);
-    }
-  }, [action, query]);
+    const saved = localStorage.getItem('startupProfile');
+    if (saved) setProfile(JSON.parse(saved));
+  }, []);
 
-  // Trigger Full Deck Gen
+  // Effect to handle auto-trigger
   useEffect(() => {
-    if (action === 'generate_deck' && query && !isGeneratingDeck && !hasGeneratedDeck) {
-      handleGenerateDeck(query);
+    if (query && action === 'generate_deck' && !deckScript && profile) {
+      handleGenerateDeck();
     }
-  }, [action, query]);
+  }, [action, query, profile]);
 
-  // Trigger Website Gen
-  useEffect(() => {
-    if (action === 'generate_website' && query && !isGeneratingWebsite && !generatedWebsiteId) {
-      handleGenerateWebsite(query);
-    }
-  }, [action, query]);
-
-  const handleGenerateVideo = async (prompt: string) => {
-    setIsGeneratingVideo(true);
-    try {
-      // Simulate Veo generation 
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setVideoUrl("https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"); // Placeholder for demo
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsGeneratingVideo(false);
-    }
-  };
-
-  const handleGenerateLogo = async (prompt: string) => {
-    setIsGeneratingLogo(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp', // Updated model
-        contents: {
-          parts: [{ text: `Design a modern, minimalist startup logo for: ${prompt}. Vector graphic style, clean lines, professional. Return ONLY the base64 image data if possible or a description.` }]
-        }
-      });
-      console.log("Logo Gen Response", response);
-      // For demo purposes, we might just set a placeholder if API fails or doesn't return generic image
-      setLogoUrl("https://via.placeholder.com/150?text=Startup+Logo");
-    } catch (e) {
-      console.error("Logo Generation Error", e);
-      setLogoUrl("https://via.placeholder.com/150?text=Logo+Error");
-    } finally {
-      setIsGeneratingLogo(false);
-    }
-  };
-
-  // Generate Veo video and audio media
-  const handleGenerateVeoMedia = async (script: string, companyName: string) => {
-    setIsGeneratingVeoMedia(true);
-    try {
-      console.log('Starting Veo media generation...');
-      const media = await generatePitchDeckMedia(script, companyName);
-      setVeoMedia(media);
-
-      // Also update the video URL for backward compatibility
-      if (media.video?.videoUrl) {
-        setVideoUrl(media.video.videoUrl);
-      }
-    } catch (error) {
-      console.error('Error generating Veo media:', error);
-    } finally {
-      setIsGeneratingVeoMedia(false);
-    }
-  };
-
-  // Generate video separately
-  const handleGenerateVideoOnly = async () => {
-    if (!deckScript) {
-      alert('Please generate a deck first to create a video from the script.');
-      return;
-    }
-
-    setIsGeneratingVeoMedia(true);
-    try {
-      console.log('Generating video separately with Veo 3.0...');
-      const media = await generatePitchDeckMedia(deckScript, profile?.name || startupContext);
-      setVeoMedia(media);
-
-      if (media.video?.videoUrl) {
-        setVideoUrl(media.video.videoUrl);
-      }
-    } catch (error) {
-      console.error('Error generating video:', error);
-    } finally {
-      setIsGeneratingVeoMedia(false);
-    }
-  };
-
-  // Generate images for all slides
-  const handleGenerateSlideImages = async (slides: ParsedSlide[]) => {
-    setIsGeneratingImages(true);
-    try {
-      const newSlideImages = new Map<number, string>();
-
-      for (const slide of slides) {
-        console.log(`Generating image for slide ${slide.slideNumber}: ${slide.title}`);
-
-        const imageResponse = await generateSlideImage({
-          slideNumber: slide.slideNumber,
-          slideTitle: slide.title,
-          slideContent: slide.content,
-          speakerNotes: slide.speakerNotes,
-          logoUrl: logoUrl || undefined,
-          companyName: profile?.name
-        });
-
-        if (imageResponse.status === 'success') {
-          newSlideImages.set(slide.slideNumber, imageResponse.imageUrl);
-          // Update state incrementally so user sees progress
-          setSlideImages(new Map(newSlideImages));
-        }
-
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      }
-
-      console.log(`Generated ${newSlideImages.size} slide images`);
-    } catch (error) {
-      console.error('Error generating slide images:', error);
-    } finally {
-      setIsGeneratingImages(false);
-    }
-  };
-
-  const handleGenerateDeck = async (prompt: string) => {
+  const handleGenerateDeck = async () => {
+    if (isGeneratingDeck) return;
     setIsGeneratingDeck(true);
+    setNotification("Generating pitch deck script...");
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Use real Gemini 2.0 Flash generation
+      // Fallback profile if loading failed or empty
+      const currentProfile = profile || {
+        name: 'New Startup',
+        industry: 'Technology',
+        description: 'A revolutionary tech startup.',
+        problem: 'Inefficiency in the market.',
+        solution: 'AI-driven automation.',
+        targetAudience: 'Enterprises',
+        metrics: { tam: '10B', sam: '1B' }
+      };
 
-      // Build a rich context from the actual startup profile
-      const contextDetails = profile ? `
-Company: ${profile.name}
-Industry: ${profile.industry}
-Description: ${profile.description}
-Problem: ${profile.problem}
-Solution: ${profile.solution}
-Target Audience: ${profile.targetAudience}
-Revenue Model: ${profile.revenueModel}
-Pricing Strategy: ${profile.pricingStrategy}
-Stage: ${profile.stage}
-Team Size: ${profile.teamSize}
-Funding History: ${profile.fundingHistory}
-Fundraising Goals: ${profile.fundraisingGoals}
-Competitors: ${profile.competitors}
-TAM: ${profile.metrics?.tam}
-SAM: ${profile.metrics?.sam}
-SOM: ${profile.metrics?.som}
-` : prompt;
+      const script = await generatePitchDeckScript(currentProfile);
+      setDeckScript(script);
 
-      // 1. Generate Script with rich context
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: {
-          parts: [{
-            text: `Act as a startup founder. Write a compelling 5-slide pitch deck script based on this startup profile:
-
-${contextDetails}
-
-Structure required:
-Slide 1: Title & Tagline (Company name, powerful tagline based on their solution)
-Slide 2: The Problem (Use the actual problem statement from the profile)
-Slide 3: The Solution (Use the actual solution from the profile)
-Slide 4: Market Size (Use TAM/SAM/SOM metrics from the profile)  
-Slide 5: Business Model & Ask (Use revenue model, pricing, and fundraising goals)
-
-For each slide, provide:
-- Content (Bullet points based on actual data)
-- Speaker Notes (Professional pitch language)` }]
-        }
-      });
-
-      if (response.text) {
-        const scriptText = response.text;
-        setDeckScript(scriptText);
-        setHasGeneratedDeck(true);
-
-        // Parse the script into slides
-        const cleanedScript = cleanScript(scriptText);
-        const slides = parseSlideScript(cleanedScript);
-        setParsedSlides(slides);
-
-        // Generate images for each slide
-        handleGenerateSlideImages(slides);
-
-        // Generate Veo video and audio
-        handleGenerateVeoMedia(scriptText, profile?.name || prompt);
-      } else {
-        throw new Error("Empty response");
-      }
-
-      // 2. Trigger Assets if they don't exist
-      if (!logoUrl && !isGeneratingLogo) {
-        handleGenerateLogo(profile?.name || prompt);
-      }
-
-    } catch (e: any) {
-      console.warn("Deck Generation API throttled or failed, using smart fallback.", e);
-
-      // Smart Fallback using ACTUAL Profile Data
-      const fallbackScript = `Slide 1: ${profile?.name || 'Your Startup'} - Vision
-Title: ${profile?.name || 'Company Name'}
-- Tagline: "${profile?.solution ? profile.solution.substring(0, 60) : 'The Future of Innovation is Here'}"
-- Industry: ${profile?.industry || 'Technology'}
-- Stage: ${profile?.stage || 'Early Stage'}
-
-Speaker Notes: "Hi everyone, we are ${profile?.name || 'our company'}. We're transforming the ${profile?.industry || 'technology'} industry with our innovative solution."
-
-Slide 2: The Problem
-- ${profile?.problem || 'Current solutions in the market are slow and expensive.'}
-- Target Audience Pain Points: ${profile?.targetAudience || 'Early adopters'} face significant challenges.
-- Market Gap: Existing solutions don't meet modern expectations.
-
-Speaker Notes: "We identified a critical problem: ${profile?.problem || 'the industry is ready for disruption'}."
-
-Slide 3: The Solution - ${profile?.name || 'Our Platform'}
-- ${profile?.solution || 'An AI-powered integrated platform.'}
-- ${profile?.description || 'Comprehensive solution for modern needs.'}
-- Key Differentiator: ${profile?.pricingStrategy || 'Competitive pricing with premium value.'}
-
-Speaker Notes: "Our solution directly addresses these pain points. ${profile?.solution || 'We built what the market truly needs.'}"
-
-Slide 4: Market Opportunity
-- Total Addressable Market (TAM): ${profile?.metrics?.tam || '$50B+'}
-- Serviceable Available Market (SAM): ${profile?.metrics?.sam || '$12B'}
-- Serviceable Obtainable Market (SOM): ${profile?.metrics?.som || '$1B'}
-- Target Audience: ${profile?.targetAudience || 'Early Adopters & SMBs'}
-
-Speaker Notes: "The market opportunity is massive. Our TAM is ${profile?.metrics?.tam || 'in the billions'}, and we're positioned to capture significant share."
-
-Slide 5: Business Model & Ask
-- Revenue Model: ${profile?.revenueModel || 'SaaS Subscription'}
-- Team: ${profile?.teamSize || 'Growing'} members
-- Funding History: ${profile?.fundingHistory || 'Pre-seed'}
-- The Ask: ${profile?.fundraisingGoals || 'Raising to accelerate growth'}
-
-Speaker Notes: "We have a clear path to profitability. We're raising ${profile?.fundraisingGoals || 'our next round'} to accelerate growth and market capture."`;
-
-      setDeckScript(fallbackScript);
-      setHasGeneratedDeck(true);
-
-      // Parse fallback script and generate images
-      const cleanedScript = cleanScript(fallbackScript);
-      const slides = parseSlideScript(cleanedScript);
+      const slides = parseSlideScript(script);
       setParsedSlides(slides);
-      handleGenerateSlideImages(slides);
-      handleGenerateVeoMedia(fallbackScript, profile?.name || prompt);
+
+      setNotification("Script generated! Creating visuals...");
+      handleGenerateSlideImages(slides); // Auto trigger images
+    } catch (error) {
+      console.error("Deck generation failed", error);
+      setNotification("Failed to generate deck script.");
     } finally {
       setIsGeneratingDeck(false);
     }
   };
 
-  const handleGenerateWebsite = async (prompt: string) => {
-    setIsGeneratingWebsite(true);
-
+  const handleGenerateSlideImages = async (slides: ParsedSlide[]) => {
+    setIsGeneratingImages(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Prepare requests for batch generation
+      const requests = slides.map(s => ({
+        slideNumber: s.slideNumber,
+        slideTitle: s.title,
+        slideContent: s.content, // content is string
+        speakerNotes: s.speakerNotes,
+        companyName: profile?.name
+      }));
 
-      // Generate website content
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: {
-          parts: [{
-            text: `You are a professional web developer. Create a complete, modern, responsive single-page website for: "${prompt}"
+      // Use real Gemini 3 Pro Vision generation
+      const generatedImages = await generateSlideImages(requests);
 
-Requirements:
-1. Generate THREE separate sections:
-   - HTML: Semantic HTML5 structure with proper tags
-   - CSS: Modern, responsive design with flexbox/grid, mobile-first approach
-   - JavaScript: Interactive elements, smooth animations, form validation if applicable
-
-2. Design style:
-   - Modern, clean UI with professional color scheme
-   - Responsive design (mobile, tablet, desktop)
-   - Smooth animations and transitions
-   - Professional typography
-   - Call-to-action buttons
-
-3. Structure:
-   - Hero section with compelling headline
-   - Features/Services section (3-4 items)
-   - About/Value proposition
-   - Contact/CTA section
-   - Navigation menu
-
-4. Format your response EXACTLY like this:
-===HTML===
-[HTML code here]
-===CSS===
-[CSS code here]
-===JS===
-[JavaScript code here]
-===END===
-
-Make it production-ready and visually appealing!`
-          }]
+      const newImages = new Map(slideImages);
+      generatedImages.forEach(img => {
+        if (img.status === 'success') {
+          newImages.set(img.slideNumber, img.imageUrl);
         }
       });
 
-      if (!response.text) {
-        throw new Error('No response from Gemini');
-      }
-
-      // Parse the structured response
-      const text = response.text;
-      const htmlMatch = text.match(/===HTML===\s*([\s\S]*?)\s*===CSS===/);
-      const cssMatch = text.match(/===CSS===\s*([\s\S]*?)\s*===JS===/);
-      const jsMatch = text.match(/===JS===\s*([\s\S]*?)\s*===END===/);
-
-      if (!htmlMatch || !cssMatch || !jsMatch) {
-        throw new Error('Failed to parse generated website structure');
-      }
-
-      const htmlContent = htmlMatch[1].trim();
-      const cssContent = cssMatch[1].trim();
-      const jsContent = jsMatch[1].trim();
-
-      // Generate unique ID
-      const websiteId = `web_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      // Save to storage
-      const website = {
-        id: websiteId,
-        title: prompt.length > 50 ? prompt.substring(0, 47) + '...' : prompt,
-        prompt: prompt,
-        htmlContent,
-        cssContent,
-        jsContent,
-        createdAt: new Date().toISOString(),
-        previewUrl: `#/?view=website_preview&websiteId=${websiteId}`
-      };
-
-      WebsiteStorageService.saveWebsite(website);
-      setGeneratedWebsiteId(websiteId);
-
+      setSlideImages(newImages);
+      setNotification("Deck generation complete!");
     } catch (error) {
-      console.error('Website generation error:', error);
-      alert('Failed to generate website. Please try again.');
+      console.error("Image generation failed", error);
+      setNotification("Some images failed to generate.");
     } finally {
-      setIsGeneratingWebsite(false);
+      setIsGeneratingImages(false);
     }
   };
 
   return (
-    <div className="space-y-6 h-full flex flex-col animate-in slide-in-from-right duration-500 text-slate-900">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-slate-900">Pitch Deck Creator</h1>
-          <p className="text-slate-500">AI-Assisted Storytelling for {profile?.name || 'Your Startup'}</p>
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 relative bg-slate-50/50 min-h-screen px-2 h-screen flex flex-col">
+
+      {/* Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in slide-in-from-bottom-4">
+          <Sparkles size={16} className="text-indigo-400" />
+          {notification}
         </div>
-        <Button
-          className="gap-2"
-          onClick={() => handleGenerateDeck(startupContext)}
-          disabled={isGeneratingDeck}
-        >
-          {isGeneratingDeck ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
-          {isGeneratingDeck ? 'Generating Deck...' : 'Auto-Generate Deck'}
-        </Button>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200/60 flex-shrink-0">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">
+            Pitch Deck Studio
+          </h1>
+          <p className="text-slate-500 mt-1 text-lg">
+            AI-powered storytelling for {profile?.name || 'Your Startup'}.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-slate-100 p-1 rounded-xl flex gap-1">
+            <button
+              onClick={() => setActiveTab('editor')}
+              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'editor' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Script Editor
+            </button>
+            <button
+              onClick={() => setActiveTab('preview')}
+              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'preview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Presentation Mode
+            </button>
+          </div>
+          <Button
+            onClick={handleGenerateDeck}
+            disabled={isGeneratingDeck}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white h-11 px-6 rounded-xl shadow-lg shadow-indigo-500/20 gap-2 font-semibold"
+          >
+            {isGeneratingDeck ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+            Generate Deck
+          </Button>
+          <Button variant="outline" className="h-11 w-11 p-0 rounded-xl bg-white border-slate-200 text-slate-700 hover:text-indigo-600">
+            <Share2 size={20} />
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-        {/* Left Column: Video & Slides Preview */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Video Section */}
-          <Card className="bg-slate-50 border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-slate-900 flex items-center gap-2">
-                <Video size={18} className="text-purple-600" />
-                Veo 3.0 Video Presentation
-              </h3>
-              <div className="flex items-center gap-2">
-                {veoMedia?.video?.status === 'success' && (
-                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
-                    Generated
-                  </span>
-                )}
-                {veoMedia?.video?.status === 'error' && (
-                  <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded flex items-center gap-1">
-                    Error
-                  </span>
-                )}
-                <Button
-                  size="sm"
-                  onClick={handleGenerateVideoOnly}
-                  disabled={isGeneratingVeoMedia || !deckScript}
-                  className="gap-2"
-                >
-                  {isGeneratingVeoMedia ? (
-                    <>
-                      <Loader2 className="animate-spin" size={14} />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={14} />
-                      Generate Video
-                    </>
-                  )}
-                </Button>
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        {/* Main Workspace */}
+        <div className="lg:col-span-8 flex flex-col gap-6 h-full min-h-0">
+          {/* Slide Preview / Canvas */}
+          <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] relative overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Slide {currentSlide} of {parsedSlides.length || 5}</span>
+                {isGeneratingImages && <span className="text-xs text-indigo-600 flex items-center gap-1 animate-pulse"><Loader2 size={12} className="animate-spin" /> Rendering Assets</span>}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setCurrentSlide(Math.max(1, currentSlide - 1))} disabled={currentSlide === 1}><Layout size={16} /></Button>
               </div>
             </div>
-            <div className="aspect-video border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center relative overflow-hidden group bg-white">
-              {videoUrl || veoMedia?.video?.videoUrl ? (
-                <video
-                  src={videoUrl || veoMedia?.video?.videoUrl}
-                  controls
-                  className="w-full h-full object-cover rounded-lg"
-                  poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Crect width='1920' height='1080' fill='%234F46E5'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-size='48' font-family='system-ui'%3EPitch Deck Video%3C/text%3E%3C/svg%3E"
-                />
-              ) : veoMedia?.video?.status === 'error' ? (
-                <div className="text-center space-y-4 p-6">
-                  <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
-                    <Video size={28} className="text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-slate-600 font-medium">Video Generation Failed</p>
-                    <p className="text-slate-400 text-sm mt-1 max-w-md mx-auto">
-                      {veoMedia.video.error || 'An error occurred during video generation'}
-                    </p>
-                    <Button
-                      size="sm"
-                      onClick={handleGenerateVideoOnly}
-                      className="mt-3 gap-2"
-                    >
-                      <Sparkles size={14} />
-                      Try Again
-                    </Button>
-                  </div>
-                </div>
-              ) : isGeneratingVeoMedia ? (
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Loader2 className="animate-spin text-purple-600" size={28} />
-                  </div>
-                  <div>
-                    <p className="text-slate-600 font-medium">Generating Veo 3.0 Video...</p>
-                    <p className="text-slate-400 text-sm mt-1">Creating professional pitch presentation</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Video size={28} className="text-slate-400" />
-                  </div>
-                  <div>
-                    <p className="text-slate-600 font-medium">No Video Generated Yet</p>
-                    <p className="text-slate-400 text-sm mt-1">Click "Generate Video" to create an AI-powered presentation</p>
-                  </div>
-                </div>
-              )}
-            </div>
 
-            {/* Audio Player Section */}
-            {veoMedia?.audio?.audioUrl && (
-              <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200">
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                    <Play size={18} className="text-purple-600" />
+            <div className="flex-1 bg-slate-100 flex items-center justify-center p-8 relative overflow-hidden group">
+              {/* Checkerboard pattern background */}
+              <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(45deg,#000_25%,transparent_25%,transparent_75%,#000_75%,#000),linear-gradient(45deg,#000_25%,transparent_25%,transparent_75%,#000_75%,#000)] bg-[length:20px_20px] bg-[position:0_0,10px_10px]"></div>
+
+              <div className="aspect-video w-full max-h-full bg-white shadow-2xl rounded-xl overflow-hidden relative transition-transform duration-500 ease-out group-hover:scale-[1.02]">
+                {slideImages.get(currentSlide) ? (
+                  <img src={slideImages.get(currentSlide)} alt="Slide" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                    {isGeneratingImages ? <Loader2 size={48} className="animate-spin mb-4 text-indigo-200" /> : <ImageIcon size={64} className="mb-4 opacity-50" />}
+                    <p className="font-medium text-slate-400">{isGeneratingImages ? 'Generating AI Visuals...' : 'Preview Unavailable'}</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-purple-900 mb-1">Audio Narration</p>
-                    <audio
-                      src={veoMedia.audio.audioUrl}
-                      controls
-                      className="w-full h-8"
-                      style={{ maxHeight: '32px' }}
-                    />
-                  </div>
+                )}
+
+                {/* Overlay Controls */}
+                <div className="absolute bottom-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button className="bg-black/50 hover:bg-black/70 text-white border-0 backdrop-blur-md h-10 w-10 p-0 rounded-full"><Edit3 size={16} /></Button>
+                  <Button className="bg-indigo-600/90 hover:bg-indigo-600 text-white border-0 backdrop-blur-md h-10 w-10 p-0 rounded-full shadow-lg"><Download size={16} /></Button>
                 </div>
               </div>
-            )}
-          </Card>
-
-          {/* Pitch Deck Slides Section */}
-          <Card className="bg-slate-50 border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-slate-900 flex items-center gap-2">
-                <ImageIcon size={18} className="text-indigo-600" />
-                Pitch Deck Slides
-              </h3>
-              {slideImages.size > 0 && (
-                <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-                  {slideImages.size}/{parsedSlides.length} Slides
-                </span>
-              )}
             </div>
 
-            {/* Current Slide Preview */}
-            <div className="aspect-video border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center relative overflow-hidden group bg-white mb-4">
-              {slideImages.get(currentSlide) ? (
-                <div className="w-full h-full relative">
-                  <img
-                    src={slideImages.get(currentSlide)}
-                    alt={`Slide ${currentSlide}`}
-                    className="w-full h-full object-contain rounded-lg"
-                  />
-                  {parsedSlides[currentSlide - 1] && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                      <h3 className="text-white font-semibold text-lg">{parsedSlides[currentSlide - 1].title}</h3>
-                      <p className="text-white/80 text-xs mt-1">Slide {currentSlide} of {parsedSlides.length}</p>
-                    </div>
-                  )}
-                </div>
-              ) : isGeneratingImages ? (
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Loader2 className="animate-spin text-indigo-600" size={28} />
-                  </div>
-                  <div>
-                    <p className="text-slate-600 font-medium">Generating Slide Images...</p>
-                    <p className="text-slate-400 text-sm mt-1">Using gemini-3-pro-image-preview ({slideImages.size}/{parsedSlides.length} complete)</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <ImageIcon size={28} className="text-slate-400" />
-                  </div>
-                  <div>
-                    <p className="text-slate-600 font-medium">No Slides Generated Yet</p>
-                    <p className="text-slate-400 text-sm mt-1">Generate a deck to create AI-powered slides</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Slide Thumbnails Strip */}
-            <div className="grid grid-cols-5 gap-3">
-              {(parsedSlides.length > 0 ? parsedSlides : [1, 2, 3, 4, 5]).map((slide, index) => {
-                const slideNum = typeof slide === 'number' ? slide : slide.slideNumber;
-                const isActive = slideNum === currentSlide;
-                const hasImage = slideImages.has(slideNum);
-
+            {/* Thumbnails Strip */}
+            <div className="h-28 bg-white border-t border-slate-100 p-4 flex gap-4 overflow-x-auto">
+              {(parsedSlides.length > 0 ? parsedSlides : [1, 2, 3, 4, 5]).map((s, i) => {
+                const num = typeof s === 'number' ? s : s.slideNumber;
                 return (
-                  <div
-                    key={slideNum}
-                    onClick={() => setCurrentSlide(slideNum)}
-                    className={`aspect-video bg-white rounded-md border-2 ${isActive
-                      ? 'border-indigo-500 shadow-lg ring-2 ring-indigo-200 scale-105'
-                      : 'border-slate-200'
-                      } hover:border-indigo-400 hover:shadow-md cursor-pointer transition-all p-1 flex flex-col justify-between overflow-hidden`}
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(num)}
+                    className={`aspect-video h-full rounded-lg border-2 transition-all overflow-hidden relative flex-shrink-0 ${currentSlide === num ? 'border-indigo-600 ring-2 ring-indigo-100 shadow-md' : 'border-slate-100 hover:border-slate-300'}`}
                   >
-                    {hasImage ? (
-                      <img
-                        src={slideImages.get(slideNum)}
-                        alt={`Slide ${slideNum}`}
-                        className="flex-1 w-full h-full object-cover rounded-sm"
-                      />
+                    {slideImages.get(num) ? (
+                      <img src={slideImages.get(num)} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="flex-1 flex items-center justify-center">
-                        {isGeneratingImages ? (
-                          <Loader2 className="animate-spin text-indigo-400" size={14} />
-                        ) : (
-                          <div className="h-1.5 w-full bg-slate-100 rounded-sm" />
-                        )}
+                      <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300 text-xs font-bold">
+                        {num}
                       </div>
                     )}
-                    <span className="text-[10px] text-slate-400 font-medium text-center mt-1 px-1 truncate">
-                      {typeof slide === 'number' ? `Slide ${slideNum}` : slide.title}
-                    </span>
-                  </div>
-                );
+                  </button>
+                )
               })}
+              <button className="aspect-video h-full rounded-lg border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 gap-1">
+                <PlusIcon size={20} />
+                <span className="text-[10px] font-bold uppercase">Add Slide</span>
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Tools Panel */}
-        <div className="space-y-6">
-          <Card className="border-slate-200 shadow-sm">
-            <h3 className="font-medium text-slate-900 mb-4">Generated Script</h3>
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-lg text-sm text-slate-700 font-mono h-[400px] overflow-y-auto whitespace-pre-wrap leading-relaxed">
-              {deckScript || <span className="text-slate-400 italic">Click 'Auto-Generate' to create your script based on your profile inputs...</span>}
+        {/* Sidebar Tools */}
+        <div className="lg:col-span-4 flex flex-col gap-6 h-full min-h-0 overflow-y-auto pb-4">
+
+          {/* Script Editor Card */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex-1 flex flex-col min-h-[400px]">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <FileText size={20} className="text-slate-400" />
+              Script & Content
+            </h3>
+            <textarea
+              value={deckScript}
+              onChange={(e) => setDeckScript(e.target.value)}
+              placeholder="Generative AI will write your pitch here..."
+              className="flex-1 w-full p-4 bg-slate-50 border-0 rounded-xl text-sm font-mono text-slate-600 leading-relaxed resize-none focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            />
+            <div className="mt-4 flex justify-between items-center text-xs text-slate-400 font-medium">
+              <span>{deckScript.split(' ').length} words</span>
+              <span className="flex items-center gap-1 text-emerald-600"><Check size={12} /> Saved</span>
             </div>
-          </Card>
+          </div>
 
-          <Card className="border-slate-200 shadow-sm">
-            <h3 className="font-medium text-slate-900 mb-4">Assets</h3>
-            <div className="space-y-3">
-              {/* Logo Preview */}
-              <div className="flex gap-2">
-                <div className="h-12 w-12 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden">
-                  {logoUrl ? <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" /> : <ImageIcon size={16} className="text-slate-400" />}
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-slate-500">Brand Logo</p>
-                  <p className="text-xs font-medium text-slate-900">{logoUrl ? 'Generated' : 'Pending'}</p>
-                </div>
+          {/* Media Card */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Video size={20} className="text-indigo-600" />
+              Veo AI Video
+            </h3>
+
+            <div className="bg-slate-900 rounded-xl aspect-video relative overflow-hidden group">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Button className="rounded-full w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white pl-4 shadow-xl border-0">
+                  <Play fill="currentColor" size={24} />
+                </Button>
               </div>
-
-              {/* Slide Images Status */}
-              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <ImageIcon size={14} className="text-indigo-600" />
-                  <span className="text-xs font-medium text-indigo-900">Slide Images</span>
-                </div>
-                {isGeneratingImages ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="animate-spin text-indigo-600" size={12} />
-                    <span className="text-xs text-indigo-700">Generating {slideImages.size}/{parsedSlides.length}</span>
-                  </div>
-                ) : slideImages.size > 0 ? (
-                  <p className="text-xs text-indigo-700">{slideImages.size} slides generated with gemini-3-pro-image-preview</p>
-                ) : (
-                  <p className="text-xs text-indigo-600">Ready to generate</p>
-                )}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                <p className="text-white text-sm font-bold">Pitch Rehearsal 1</p>
+                <p className="text-slate-300 text-xs">02:14 • AI Narration</p>
               </div>
-
-              {/* Veo Media Status */}
-              {(isGeneratingVeoMedia || veoMedia) && (
-                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Video size={14} className="text-purple-600" />
-                    <span className="text-xs font-medium text-purple-900">Veo 3.0 Media</span>
-                  </div>
-                  {isGeneratingVeoMedia ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="animate-spin text-purple-600" size={12} />
-                      <span className="text-xs text-purple-700">Generating with Veo 3.0...</span>
-                    </div>
-                  ) : veoMedia ? (
-                    <div className="space-y-1">
-                      {veoMedia.video?.status === 'success' && veoMedia.video?.videoUrl && (
-                        <p className="text-xs text-green-700 flex items-center gap-1">
-                          <span className="text-green-600">✓</span> Video generated (Veo 3.0)
-                        </p>
-                      )}
-                      {veoMedia.video?.status === 'error' && (
-                        <p className="text-xs text-red-700 flex items-center gap-1">
-                          <span className="text-red-600">✗</span> Video generation failed
-                        </p>
-                      )}
-                      {veoMedia.audio?.status === 'success' && veoMedia.audio?.audioUrl && (
-                        <p className="text-xs text-green-700 flex items-center gap-1">
-                          <span className="text-green-600">✓</span> Audio narration (Gemini Live)
-                        </p>
-                      )}
-                      {veoMedia.audio?.status === 'error' && (
-                        <p className="text-xs text-amber-700 flex items-center gap-1">
-                          <span className="text-amber-600">⏳</span> Audio coming soon (Preview API required)
-                        </p>
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-              )}
-
-              {/* Generate Website Button */}
-              <Button
-                variant="secondary"
-                className="w-full justify-start gap-3"
-                onClick={() => handleGenerateWebsite(startupContext)}
-                disabled={isGeneratingWebsite}
-              >
-                <Globe size={16} className="text-blue-500" />
-                {isGeneratingWebsite ? 'Generating Website...' : 'Generate Website'}
-              </Button>
-
-              {/* Generated Website Display */}
-              {generatedWebsiteId && (
-                <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                  <div className="flex items-center gap-2 text-emerald-700 mb-2">
-                    <Globe size={14} />
-                    <span className="text-xs font-medium">Website Generated!</span>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full justify-center gap-2"
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams);
-                      params.set('view', 'website_preview');
-                      params.set('websiteId', generatedWebsiteId);
-                      setSearchParams(params);
-                    }}
-                  >
-                    <ExternalLink size={12} />
-                    View Generated Website
-                  </Button>
-                </div>
-              )}
             </div>
-          </Card>
+            <Button className="w-full mt-4 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100 rounded-xl font-semibold">
+              <Sparkles size={16} className="mr-2" /> Generate New Video
+            </Button>
+          </div>
+
         </div>
       </div>
+
     </div>
   );
 }
+
+// Icon helper
+const PlusIcon = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+)

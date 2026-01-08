@@ -2,6 +2,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DynamicWorkspace from '../components/DynamicWorkspace';
 import AGUIChat from '../components/AGUIChat';
+import { Logo } from '../components/Logo';
 import { LayoutDashboard, Users, PieChart, Wallet, Presentation, Menu, Target, Briefcase } from 'lucide-react';
 import { ViewType } from '../types';
 import { cn } from '../components/ui';
@@ -10,6 +11,7 @@ export default function Dashboard() {
     const [searchParams, setSearchParams] = useSearchParams();
     const currentView = searchParams.get('view') || ViewType.DASHBOARD;
     const isInvestor = currentView.startsWith('investor');
+    const [isAguiOpen, setIsAguiOpen] = React.useState(true);
     const [contextData, setContextData] = React.useState<any>(null);
 
     React.useEffect(() => {
@@ -133,12 +135,10 @@ Your goal is to translate user intent into structured JSON actions to drive the 
             {/* Sidebar - Desktop */}
             <aside className="hidden md:flex flex-col w-20 lg:w-64 border-r border-slate-200 bg-white shadow-sm z-20">
                 <div className="p-6 flex items-center gap-3">
-                    <div className={cn(
-                        "h-8 w-8 rounded-lg flex-shrink-0",
-                        isInvestor
-                            ? "bg-gradient-to-tr from-emerald-500 to-teal-500"
-                            : "bg-gradient-to-tr from-indigo-500 to-pink-500"
-                    )} />
+                    <Logo
+                        className="h-9 w-9 flex-shrink-0 shadow-lg shadow-indigo-500/10"
+                        type={isInvestor ? 'investor' : 'startup'}
+                    />
                     <span className="font-display font-bold text-lg tracking-tight hidden lg:block text-slate-900">
                         {isInvestor ? 'Investor Hub' : 'Startup Connect'}
                     </span>
@@ -191,30 +191,58 @@ Your goal is to translate user intent into structured JSON actions to drive the 
                 </div>
 
                 {/* Panel A: Dynamic Workspace */}
-                <div className="flex-1 h-1/2 md:h-full md:flex-[2] lg:flex-[3] relative z-0 bg-slate-50">
+                <div className={cn(
+                    "flex-1 h-full relative z-0 bg-slate-50 transition-all duration-500 ease-in-out",
+                    isAguiOpen ? "md:flex-[2] lg:flex-[3]" : "md:flex-1"
+                )}>
                     <DynamicWorkspace />
+
+                    {/* Floating Toggle Button (Visible only when AGUI is closed) */}
+                    {!isAguiOpen && (
+                        <button
+                            onClick={() => setIsAguiOpen(true)}
+                            className={cn(
+                                "absolute bottom-6 right-6 z-50 bg-white text-slate-900 shadow-2xl rounded-full p-4 flex items-center gap-3 border border-slate-200 hover:scale-105 transition-transform animate-in slide-in-from-bottom-5",
+                                isInvestor ? "hover:border-emerald-500 hover:text-emerald-600" : "hover:border-indigo-500 hover:text-indigo-600"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg",
+                                isInvestor ? "bg-gradient-to-tr from-emerald-500 to-teal-600" : "bg-gradient-to-tr from-indigo-600 to-violet-600"
+                            )}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
+                            </div>
+                            <span className="font-bold pr-2">Ask AGUI</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Panel B: AGUI Chat */}
-                <div className="h-1/2 md:h-full md:flex-1 border-t md:border-t-0 md:border-l border-slate-200 shadow-xl z-10 relative">
-                    {contextData ? (
-                        <AGUIChat
-                            systemInstruction={systemInstruction}
-                            initialMessage={initialMessage}
-                        />
-                    ) : (
-                        <div className="flex h-full items-center justify-center bg-white">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className={cn(
-                                    "h-8 w-8 animate-spin rounded-full border-4 border-t-transparent",
-                                    isInvestor ? "border-emerald-600" : "border-indigo-600"
-                                )}></div>
-                                <p className="text-sm font-medium text-slate-500">
-                                    Loading your {isInvestor ? 'investor' : 'startup'} context...
-                                </p>
+                <div className={cn(
+                    "border-l border-slate-200 shadow-2xl z-40 relative transition-all duration-500 ease-in-out bg-white",
+                    isAguiOpen ? "w-full md:w-[400px] lg:w-[450px] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0 overflow-hidden border-0"
+                )}>
+                    <div className="h-full w-full md:w-[400px] lg:w-[450px]">
+                        {contextData ? (
+                            <AGUIChat
+                                systemInstruction={systemInstruction}
+                                initialMessage={initialMessage}
+                                onClose={() => setIsAguiOpen(false)}
+                            />
+                        ) : (
+                            <div className="flex h-full items-center justify-center bg-white">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className={cn(
+                                        "h-8 w-8 animate-spin rounded-full border-4 border-t-transparent",
+                                        isInvestor ? "border-emerald-600" : "border-indigo-600"
+                                    )}></div>
+                                    <p className="text-sm font-medium text-slate-500">
+                                        Loading your {isInvestor ? 'investor' : 'startup'} context...
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
             </main>

@@ -225,3 +225,105 @@ export const generateInvestorProfileFromChat = async (history: ChatMessage[]): P
     };
   }
 };
+
+export const generatePitchDeckScript = async (profile: any): Promise<string> => {
+  const ai = getClient();
+
+  const prompt = `
+    Create a professional, persuasive, and structured 5-slide pitch deck script for the following startup:
+    
+    Startup Name: ${profile.name}
+    Industry: ${profile.industry}
+    Description: ${profile.description}
+    Problem/Solution: ${profile.problem} / ${profile.solution}
+    Target Audience: ${profile.targetAudience}
+    Key Metrics: TAM=${profile.metrics?.tam}, SAM=${profile.metrics?.sam}
+    
+    Format the output EXACTLY as follows (maintain the "Slide X:" markers):
+
+    Slide 1: [Startup Name] - [Tagline]
+    Title: [Compelling Title]
+    Tagline: [Short Tagline]
+    Speaker Notes: [Persuasive opening remarks]
+
+    Slide 2: The Problem
+    Title: [Problem Title]
+    Content:
+    - [Bullet point 1]
+    - [Bullet point 2]
+    - [Bullet point 3]
+    Speaker Notes: [Explain the pain points]
+
+    Slide 3: Our Solution
+    Title: [Solution Title]
+    Content:
+    - [Benefit 1]
+    - [Benefit 2]
+    - [Unique Value Prop]
+    Speaker Notes: [Explain how the solution works]
+
+    Slide 4: Market Opportunity
+    Title: [Market Title]
+    Content:
+    - TAM: [Total Addressable Market]
+    - SAM: [Serviceable Market]
+    - Growth: [Growth Rate/Trend]
+    Speaker Notes: [Discuss market size and timing]
+
+    Slide 5: Business Model
+    Title: [Model Title]
+    Content:
+    - [Revenue Stream 1]
+    - [Pricing Strategy]
+    - [Sales Channel]
+    Speaker Notes: [Explain how you make money]
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        { role: 'user', parts: [{ text: prompt }] }
+      ]
+    });
+
+    const responseText = response.text;
+    if (!responseText) throw new Error("Empty response from script generation");
+
+    return responseText.trim();
+  } catch (error) {
+    console.error("Script Generation Error:", error);
+    return `Slide 1: ${profile.name}
+Title: Introduction
+Tagline: Innovating in ${profile.industry}
+Speaker Notes: Welcome to our presentation.
+
+Slide 2: The Problem
+Title: Market Gaps
+Content:
+- Inefficiency in current solutions
+- High costs
+Speaker Notes: Customers demand better.
+
+Slide 3: Our Solution
+Title: The Future
+Content:
+- AI-driven efficiency
+- Cost-effective
+Speaker Notes: We solve the core problems.
+
+Slide 4: Market
+Title: Huge Opportunity
+Content:
+- Growing market
+- Underserved segments
+Speaker Notes: The timing is right.
+
+Slide 5: Business Model
+Title: Sustainable Growth
+Content:
+- Subscription model
+- B2B Focus
+Speaker Notes: Clear path to revenue.`;
+  }
+};

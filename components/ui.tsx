@@ -35,7 +35,7 @@ export const Button: React.FC<ButtonProps> = ({ children, className, variant = '
   const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary: "bg-gradient-to-r from-indigo-600 to-pink-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02]",
+    primary: "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02]",
     secondary: "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm",
     ghost: "bg-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100",
     icon: "p-2 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-full border border-slate-200 shadow-sm"
@@ -80,13 +80,14 @@ export const Textarea = ({ className, ...props }: React.TextareaHTMLAttributes<H
 // --- Badge ---
 export interface BadgeProps {
   children?: ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'danger';
+  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'danger';
   className?: string; // Added className prop
 }
 
-export const Badge = ({ children, variant = 'default', className }: BadgeProps) => {
+export const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className }) => {
   const styles = {
     default: "bg-slate-100 text-slate-700 border-slate-200",
+    secondary: "bg-slate-100 text-slate-600 border-slate-200",
     success: "bg-emerald-50 text-emerald-700 border-emerald-200",
     warning: "bg-amber-50 text-amber-700 border-amber-200",
     danger: "bg-rose-50 text-rose-700 border-rose-200",

@@ -7,7 +7,8 @@ import {
     PieChart,
     Download,
     RefreshCw,
-    Info
+    Info,
+    ArrowUpRight
 } from 'lucide-react';
 import {
     BarChart,
@@ -86,62 +87,67 @@ export default function ValuationView() {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+        <div className="space-y-8 animate-in fade-in duration-500 pb-10 bg-slate-50/50 min-h-screen px-2">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200/60">
                 <div>
-                    <h1 className="text-3xl font-display font-bold text-slate-900">Startup Valuation</h1>
-                    <p className="text-slate-500 mt-1">Estimate your company's value using industry-standard multiples.</p>
+                    <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">Startup Valuation</h1>
+                    <p className="text-slate-500 mt-1 text-lg">Estimate your company's value using real-time industry multiples.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2">
+                <div className="flex gap-3">
+                    <Button variant="outline" className="gap-2 bg-white border-slate-200 text-slate-700 h-11 px-5 rounded-xl hover:text-indigo-600 hover:border-indigo-200 hover:bg-white shadow-sm transition-all">
                         <Download size={16} /> Export Report
                     </Button>
                     <Button
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-11 px-6 rounded-xl shadow-lg shadow-indigo-500/20 font-bold transition-all hover:-translate-y-0.5"
                         onClick={handleRecalculate}
                         disabled={isCalculating}
                     >
                         <RefreshCw size={16} className={isCalculating ? "animate-spin" : ""} />
-                        {isCalculating ? 'Updating...' : 'Recalculate'}
+                        {isCalculating ? 'Calculating...' : 'Recalculate Model'}
                     </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Left Panel: Inputs */}
-                <Card className="p-6 space-y-8 h-full bg-white border-slate-200">
-                    <div className="flex items-center gap-2 text-indigo-600 font-semibold mb-2">
-                        <Activity size={20} />
+                <Card className="p-8 space-y-8 h-full bg-white border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] rounded-3xl">
+                    <div className="flex items-center gap-3 text-indigo-600 font-bold text-lg mb-2">
+                        <div className="p-2 bg-indigo-50 rounded-xl">
+                            <Activity size={20} />
+                        </div>
                         <h2>Key Metrics</h2>
                     </div>
 
                     {/* Industry */}
-                    <div className="space-y-3">
-                        <label className="text-sm font-medium text-slate-700">Industry Sector</label>
-                        <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-4">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Industry Sector</label>
+                        <div className="grid grid-cols-2 gap-3">
                             {(Object.keys(INDUSTRY_MULTIPLIERS) as Array<keyof typeof INDUSTRY_MULTIPLIERS>).map((ind) => (
                                 <button
                                     key={ind}
                                     onClick={() => setIndustry(ind)}
-                                    className={`px-3 py-2 text-sm rounded-lg border transition-all ${industry === ind
-                                            ? 'bg-indigo-50 border-indigo-600 text-indigo-700 font-medium'
-                                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                    className={`px-4 py-3 text-sm rounded-xl border transition-all font-medium ${industry === ind
+                                        ? 'bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-900/10 scale-[1.02]'
+                                        : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600 hover:bg-slate-50'
                                         }`}
                                 >
                                     {ind}
                                 </button>
                             ))}
                         </div>
-                        <p className="text-xs text-slate-400">Current Multiplier: <span className="text-indigo-600 font-bold">{INDUSTRY_MULTIPLIERS[industry]}x</span></p>
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 mt-2">
+                            <span className="text-xs font-medium text-slate-500">Industry Multiplier</span>
+                            <span className="text-indigo-600 font-bold bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">{INDUSTRY_MULTIPLIERS[industry]}x</span>
+                        </div>
                     </div>
 
                     {/* Revenue */}
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                            <label className="text-sm font-medium text-slate-700">Annual Revenue (ARR)</label>
-                            <span className="font-mono text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded text-sm">{formatCurrency(revenue)}</span>
+                            <label className="text-sm font-bold text-slate-700">Annual Revenue (ARR)</label>
+                            <span className="font-mono text-indigo-600 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg text-sm border border-indigo-100">{formatCurrency(revenue)}</span>
                         </div>
                         <input
                             type="range"
@@ -157,8 +163,8 @@ export default function ValuationView() {
                     {/* Growth Rate */}
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                            <label className="text-sm font-medium text-slate-700">YoY Growth Rate</label>
-                            <span className="font-mono text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded text-sm">{growth}%</span>
+                            <label className="text-sm font-bold text-slate-700">YoY Growth Rate</label>
+                            <span className="font-mono text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg text-sm border border-emerald-100">+{growth}%</span>
                         </div>
                         <input
                             type="range"
@@ -174,8 +180,8 @@ export default function ValuationView() {
                     {/* Margin */}
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                            <label className="text-sm font-medium text-slate-700">EBITDA Margin</label>
-                            <span className={`font-mono font-bold px-2 py-1 rounded text-sm ${margin >= 0 ? 'text-blue-600 bg-blue-50' : 'text-red-500 bg-red-50'}`}>{margin}%</span>
+                            <label className="text-sm font-bold text-slate-700">EBITDA Margin</label>
+                            <span className={`font-mono font-bold px-3 py-1.5 rounded-lg text-sm border ${margin >= 0 ? 'text-blue-600 bg-blue-50 border-blue-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>{margin}%</span>
                         </div>
                         <input
                             type="range"
@@ -188,70 +194,78 @@ export default function ValuationView() {
                         />
                     </div>
 
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <h4 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                            <Info size={14} /> Methodology
-                        </h4>
-                        <p className="text-xs text-slate-500 leading-relaxed">
-                            This valuation model uses a composite of Revenue Multiples adjusted for growth velocity and profitability (Rule of 40). It provides a preliminary estimate for {industry} startups at Seed to Series A stages.
-                        </p>
+                    <div className="pt-4 border-t border-slate-100">
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
+                            <Info size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                            <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                                This valuation model uses a composite of Revenue Multiples adjusted for growth velocity and profitability (Rule of 40).
+                            </p>
+                        </div>
                     </div>
                 </Card>
 
                 {/* Right Panel: Results */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-8">
 
                     {/* Main Valuation Card */}
-                    <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl p-8 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-10 text-white shadow-2xl shadow-indigo-500/25 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/15 transition-colors duration-700"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+
                         <div className="relative z-10">
-                            <div className="flex items-center gap-2 opacity-80 mb-2">
-                                <Target size={18} />
-                                <span className="text-sm font-medium tracking-wide uppercase">Estimated Post-Money Valuation</span>
+                            <div className="flex items-center gap-2 opacity-80 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                                <Target size={14} />
+                                <span className="text-xs font-bold tracking-wide uppercase">Estimated Post-Money Valuation</span>
                             </div>
-                            <div className="text-5xl md:text-6xl font-display font-bold mb-4 tracking-tight">
+                            <div className="text-5xl md:text-7xl font-display font-bold mb-8 tracking-tight">
                                 {formatCompact(valuation.base)}
                             </div>
-                            <div className="flex flex-wrap gap-4 text-sm opacity-90">
-                                <div className="px-3 py-1 rounded-full bg-white/20 border border-white/10">
-                                    Range: {formatCompact(valuation.conservative)} - {formatCompact(valuation.aggressive)}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="bg-black/20 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                                    <div className="text-xs text-indigo-200 font-bold uppercase tracking-wider mb-1">Conservative Estimate</div>
+                                    <div className="text-xl font-bold">{formatCompact(valuation.conservative)}</div>
                                 </div>
-                                <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-100 font-medium">
-                                    {growth > 30 ? 'High Growth Status' : 'Steady Growth'}
+                                <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                                    <div className="text-xs text-white/80 font-bold uppercase tracking-wider mb-1">Aggressive Estimate</div>
+                                    <div className="text-xl font-bold flex items-center gap-2">
+                                        {formatCompact(valuation.aggressive)}
+                                        <ArrowUpRight size={16} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Charts & Breakdown */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="p-6">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <TrendingUp size={18} className="text-indigo-600" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <Card className="p-6 border-slate-200 shadow-sm rounded-3xl bg-white">
+                            <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2 text-lg">
+                                <TrendingUp size={20} className="text-indigo-600" />
                                 Valuation Sensitivity
                             </h3>
                             <div className="h-64 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis
                                             dataKey="name"
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#64748B', fontSize: 12 }}
+                                            tick={{ fill: '#64748B', fontSize: 12, fontWeight: 600 }}
                                             dy={10}
                                         />
                                         <YAxis
                                             hide={true}
                                         />
                                         <Tooltip
-                                            cursor={{ fill: 'transparent' }}
-                                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                            cursor={{ fill: '#f8fafc' }}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px', fontWeight: 'bold' }}
                                             formatter={(value: any) => [formatCompact(value), 'Valuation']}
                                         />
                                         <Bar
                                             dataKey="value"
-                                            radius={[6, 6, 0, 0]}
+                                            radius={[8, 8, 0, 0]}
                                             animationDuration={1500}
                                         >
                                             {chartData.map((entry, index) => (
@@ -263,43 +277,43 @@ export default function ValuationView() {
                             </div>
                         </Card>
 
-                        <Card className="p-6">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <PieChart size={18} className="text-pink-500" />
+                        <Card className="p-6 border-slate-200 shadow-sm rounded-3xl bg-white">
+                            <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2 text-lg">
+                                <PieChart size={20} className="text-sky-500" />
                                 Value Drivers
                             </h3>
-                            <div className="space-y-4 mt-8">
+                            <div className="space-y-6 mt-4">
                                 <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-slate-600">Base Revenue</span>
-                                        <span className="font-bold text-slate-900">+45%</span>
+                                    <div className="flex justify-between text-sm mb-2 font-bold">
+                                        <span className="text-slate-500">Base Revenue</span>
+                                        <span className="text-slate-900">+45% Impact</span>
                                     </div>
-                                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-indigo-500 w-[45%]"></div>
+                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-indigo-500 w-[45%] shadow-sm rounded-full"></div>
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-slate-600">Industry Premium ({industry})</span>
-                                        <span className="font-bold text-slate-900">+{Math.min(INDUSTRY_MULTIPLIERS[industry] * 2, 35).toFixed(0)}%</span>
+                                    <div className="flex justify-between text-sm mb-2 font-bold">
+                                        <span className="text-slate-500">Industry Premium</span>
+                                        <span className="text-slate-900">+{Math.min(INDUSTRY_MULTIPLIERS[industry] * 2, 35).toFixed(0)}% Impact</span>
                                     </div>
-                                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-pink-500" style={{ width: `${Math.min(INDUSTRY_MULTIPLIERS[industry] * 2, 35)}%` }}></div>
+                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-sky-500 rounded-full" style={{ width: `${Math.min(INDUSTRY_MULTIPLIERS[industry] * 2, 35)}%` }}></div>
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-slate-600">Growth Velocity</span>
-                                        <span className="font-bold text-slate-900">+{Math.min(growth, 100)}%</span>
+                                    <div className="flex justify-between text-sm mb-2 font-bold">
+                                        <span className="text-slate-500">Growth Velocity</span>
+                                        <span className="text-slate-900">+{Math.min(growth, 100)}% Impact</span>
                                     </div>
-                                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-emerald-500" style={{ width: `${Math.min(growth, 100)}%` }}></div>
+                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(growth, 100)}%` }}></div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-8 pt-4 border-t border-slate-100">
-                                <p className="text-sm text-center text-slate-500">
-                                    Your <span className="font-semibold text-emerald-600">growth rate</span> is the strongest driver of your current valuation.
+                            <div className="mt-8 pt-6 border-t border-slate-100">
+                                <p className="text-sm text-center text-slate-500 font-medium">
+                                    Your <span className="font-bold text-emerald-600">growth rate</span> is the strongest driver relative to your peers.
                                 </p>
                             </div>
                         </Card>
