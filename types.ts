@@ -32,6 +32,7 @@ export interface AGUIResponse {
     hash?: string;
   };
   message: string;
+  data?: any;
 }
 
 export interface ChatMessage {

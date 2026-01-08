@@ -10,9 +10,11 @@ interface AGUIChatProps {
   fullScreenMode?: boolean;
   initialMessage?: string;
   systemInstruction?: string;
+  onAnalysisComplete?: (data: any) => void;
+  onMessagesChange?: (messages: ChatMessage[]) => void;
 }
 
-export default function AGUIChat({ fullScreenMode = false, initialMessage, systemInstruction }: AGUIChatProps) {
+export default function AGUIChat({ fullScreenMode = false, initialMessage, systemInstruction, onAnalysisComplete, onMessagesChange }: AGUIChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', text: initialMessage || "Hello! I'm AGUI. I can navigate the startup ecosystem for you. Try 'Show me clothing partners' or 'Analyze the market'." }
   ]);
@@ -32,7 +34,10 @@ export default function AGUIChat({ fullScreenMode = false, initialMessage, syste
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, liveTranscript]);
+    if (onMessagesChange) {
+      onMessagesChange(messages);
+    }
+  }, [messages, liveTranscript, onMessagesChange]);
 
   const handleSend = async () => {
     const textToSend = input.trim();
@@ -45,6 +50,11 @@ export default function AGUIChat({ fullScreenMode = false, initialMessage, syste
 
     try {
       const response: AGUIResponse = await sendMessageToAGUI(messages, textToSend, systemInstruction);
+
+      if (response.data && onAnalysisComplete) {
+        onAnalysisComplete(response.data);
+      }
+
       if (response.navigation && response.navigation.params) {
         const newParams = new URLSearchParams(searchParams);
         Object.entries(response.navigation.params).forEach(([key, value]) => {

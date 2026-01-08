@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AGUIChat from '../components/AGUIChat';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react'; // Added Loader2
+import { generateProfileFromChat } from '../services/geminiService';
+import { ChatMessage } from '../types';
 
 export default function BusinessInquiry() {
     const navigate = useNavigate();
     const [step, setStep] = useState<'register' | 'chat'>('register');
     const [regData, setRegData] = useState({ email: '', password: '' });
     const [canProceed, setCanProceed] = useState(false);
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // In a real app, AGUIChat would communicate up when enough info is gathered
     // For demo, we'll allow skipping or proceeding after some interaction
@@ -19,24 +23,65 @@ export default function BusinessInquiry() {
         }
     }, [step]);
 
-    const handleComplete = () => {
-        // In a real app, we would parse the 'messages' to extract structured data.
-        // For now, we'll save a flag that the inquiry is complete and some mock extracted data
-        // that matches the "FlareUp" example the user gave, or generic if empty.
-        const mockProfile = {
-            name: "FlareUp",
-            industry: "SaaS / AI",
-            stage: "Idea/Pre-Seed",
-            description: "AI-driven platform for unmatched startup profile building and market analysis.",
-            targetAudience: "Early-stage founders",
-            metrics: {
-                tam: "$50B",
-                sam: "$10B",
-                som: "$100M"
+    const handleComplete = async () => {
+        setIsAnalyzing(true);
+        try {
+            // If we have a meaningful conversation, extract real data
+            if (chatMessages.length > 2) {
+                const extractedProfile = await generateProfileFromChat(chatMessages);
+                await handleAnalysisComplete(extractedProfile);
+            } else {
+                // Fallback to mock data if no conversation happened
+                const mockProfile = {
+                    name: "FlareUp",
+                    industry: "SaaS / AI",
+                    stage: "Idea/Pre-Seed",
+                    description: "AI-driven platform for unmatched startup profile building and market analysis.",
+                    targetAudience: "Early-stage founders",
+                    metrics: {
+                        tam: "$50B",
+                        sam: "$10B",
+                        som: "$100M"
+                    }
+                };
+                await handleAnalysisComplete(mockProfile);
             }
-        };
-        localStorage.setItem('startupProfile', JSON.stringify(mockProfile));
-        navigate('/app');
+        } catch (error) {
+            console.error("Analysis failed", error);
+            // Fallback on error
+            const mockProfile = {
+                name: "FlareUp",
+                industry: "SaaS / AI",
+                stage: "Idea/Pre-Seed",
+                description: "AI-driven platform for unmatched startup profile building and market analysis.",
+                targetAudience: "Early-stage founders",
+                metrics: {
+                    tam: "$50B",
+                    sam: "$10B",
+                    som: "$100M"
+                }
+            };
+            await handleAnalysisComplete(mockProfile);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleAnalysisComplete = async (data: any) => {
+        try {
+            await fetch('/api/save-inquiry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            localStorage.setItem('startupProfile', JSON.stringify(data));
+            navigate('/app');
+        } catch (error) {
+            console.error('Failed to save inquiry:', error);
+            // Fallback
+            localStorage.setItem('startupProfile', JSON.stringify(data));
+            navigate('/app');
+        }
     };
 
     const handleRegister = (e: React.FormEvent) => {
@@ -51,10 +96,20 @@ export default function BusinessInquiry() {
                 <div className="absolute top-4 right-4 z-50">
                     <button
                         onClick={handleComplete}
-                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-indigo-600 font-medium shadow-sm transition-all"
+                        disabled={isAnalyzing}
+                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-indigo-600 font-medium shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <span>Complete Analysis</span>
-                        <ArrowRight className="w-4 h-4" />
+                        {isAnalyzing ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Analyzing...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Complete Analysis</span>
+                                <ArrowRight className="w-4 h-4" />
+                            </>
+                        )}
                     </button>
                 </div>
             )}
@@ -108,6 +163,8 @@ export default function BusinessInquiry() {
                     <div className="flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 bg-white min-h-0 flex flex-col">
                         <AGUIChat
                             fullScreenMode={true}
+                            onAnalysisComplete={handleAnalysisComplete}
+                            onMessagesChange={setChatMessages}
                             initialMessage="Hello! Now that you're signed up, let's build your profile. Tell me about your business idea. What problem are you solving and who is your target market?"
                             systemInstruction={`
 You are AGUI, a patient and helpful startup profile builder.
@@ -138,15 +195,40 @@ Topics to Cover (Ask one by one):
 Once you have gathered at least 10-12 distinct data points, output a JSON with:
   message: "Perfect! I have captured all the necessary details. I am now generating your full startup profile, pitch deck strategy, and market analysis. Taking you to your dashboard now..."
   navigation: { path: "/app" }
+  data: {
+    name: "Business Name (inferred)",
+    industry: "Industry (inferred)",
+    description: "Full description",
+    targetAudience: "...",
+    problem: "...",
+    solution: "...",
+    revenueModel: "...",
+    pricingStrategy: "...",
+    stage: "...",
+    teamSize: "...",
+    fundingHistory: "...",
+    fundraisingGoals: "...",
+    competitors: "...",
+    marketingChannels: "...",
+    challenges: "...",
+    timeline: "...",
+    metrics: {
+      tam: "Total Addressable Market (estimate)",
+      sam: "Serviceable Addressable Market (estimate)",
+      som: "Serviceable Obtainable Market (estimate)"
+    }
+  }
 
 Response Format (JSON ONLY):
 {
   "thought": "Reasoning...",
   "message": "Your next single question...",
-  "navigation": null
+  "navigation": null,
+  "data": null
 }
 `}
                         />
+
                     </div>
                 )}
             </div>

@@ -9,6 +9,27 @@ import { cn } from '../components/ui';
 export default function Dashboard() {
     const [searchParams, setSearchParams] = useSearchParams();
     const currentView = searchParams.get('view') || ViewType.DASHBOARD;
+    const [startupData, setStartupData] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        fetch('/api/get-inquiry')
+            .then(res => res.json())
+            .then(data => {
+                // Handle array format: extract first element
+                const profile = Array.isArray(data) ? data[0] : data;
+                if (profile && !profile.error) {
+                    setStartupData(profile);
+                } else {
+                    // No data found, maybe redirect or just load generic
+                    console.log("No startup data found, using generic context");
+                    setStartupData({ name: "Your Startup", industry: "General", description: "A new venture." });
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load startup data", err);
+                setStartupData({ name: "Your Startup", industry: "General", description: "A new venture." });
+            });
+    }, []);
 
     const navItems = currentView.startsWith('investor_') ? [
         { id: ViewType.INVESTOR_DASHBOARD, label: 'Overview', icon: LayoutDashboard },
@@ -26,6 +47,59 @@ export default function Dashboard() {
     const handleNavClick = (view: ViewType) => {
         setSearchParams({ view });
     };
+
+    const systemInstruction = startupData ? `
+You are AGUI, the AI assistant for "Startup Connect".
+You are currently assisting the startup: "${startupData.name}".
+
+Context about this startup:
+- Industry: ${startupData.industry}
+- Description: ${startupData.description}
+- Problem/Solution: ${startupData.problem} / ${startupData.solution}
+- Target Audience: ${startupData.targetAudience}
+- Stage: ${startupData.stage}
+- Key Metrics: TAM=${startupData.metrics?.tam}, SAM=${startupData.metrics?.sam}
+
+Your goal is to translate user intent into structured JSON actions to drive the React UI, while keeping this context in mind.
+When the user asks for partners, analysis, or pitch decks, use the specific details of this startup to tailor your response.
+
+**The "Steering Wheel" (URL Schema)**
+You drive the website by outputting a JSON object.
+
+**A. Supported Views (view parameter)**
+- 'dashboard': Main hub, metrics, loan status.
+- 'partners': Collaboration matching table.
+- 'market_analysis': Charts and research.
+- 'startup_sale': Exit strategy and valuation.
+- 'pitch_deck': Deck creation tool.
+- 'website_preview': Website generation preview.
+
+**B. Supported Filters (params)**
+- industry: string
+- funding_min: number
+- profit_status: 'profit' | 'loss' | 'break_even'
+- q: search query string
+- action: 'trigger_veo_video' | 'trigger_imagen_logo' | 'generate_deck' | 'generate_website'
+- websiteId: string (for website preview)
+
+**Operational Rules**
+1. Intent First: If user wants to see partners, navigate there immediately.
+2. Silent Driving: Output JSON cleanly. 
+3. Missing Info: Default to a logical view.
+
+**Response Format (JSON ONLY)**
+{
+  "thought": "Internal reasoning...",
+  "navigation": {
+    "path": "/app", 
+    "params": {
+      "view": "partners",
+      "industry": "${startupData.industry}"
+    }
+  },
+  "message": "User facing message..."
+}
+` : undefined;
 
     return (
         <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
@@ -79,7 +153,19 @@ export default function Dashboard() {
 
                 {/* Panel B: AGUI Chat */}
                 <div className="h-1/2 md:h-full md:flex-1 border-t md:border-t-0 md:border-l border-slate-200 shadow-xl z-10 relative">
-                    <AGUIChat />
+                    {startupData ? (
+                        <AGUIChat
+                            systemInstruction={systemInstruction}
+                            initialMessage={`Welcome back! I'm ready to help with ${startupData.name}. We can look for partners in ${startupData.industry}, analyze your market, or create a pitch deck.`}
+                        />
+                    ) : (
+                        <div className="flex h-full items-center justify-center bg-white">
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+                                <p className="text-sm font-medium text-slate-500">Loading your startup context...</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
             </main>
