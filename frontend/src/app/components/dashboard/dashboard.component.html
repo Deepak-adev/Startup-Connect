@@ -2,27 +2,33 @@
   <div class="max-w-7xl mx-auto space-y-8">
     
     <!-- Header -->
-    <header class="flex items-center justify-between">
+    <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div>
         <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Startup Connect</h1>
         <p class="text-slate-500 mt-1">Empower Your Spark. Current View: <span class="font-bold text-indigo-600 capitalize">{{ currentView }}</span></p>
       </div>
-      <div class="px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-200">
-        <span class="text-sm font-medium text-slate-600">Industry Filter: </span>
-        <span class="text-sm font-bold text-indigo-600">{{ industry }}</span>
+      
+      <!-- Industry Quick Filter Badges -->
+      <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2">Filter:</span>
+        <button (click)="setIndustry('All')" [class.bg-indigo-600]="industry === 'All'" [class.text-white]="industry === 'All'" class="px-3 py-1.5 text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-100 transition-all">All</button>
+        <button (click)="setIndustry('Technology')" [class.bg-indigo-600]="industry === 'Technology'" [class.text-white]="industry === 'Technology'" class="px-3 py-1.5 text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-100 transition-all">Technology</button>
+        <button (click)="setIndustry('CleanTech')" [class.bg-indigo-600]="industry === 'CleanTech'" [class.text-white]="industry === 'CleanTech'" class="px-3 py-1.5 text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-100 transition-all">CleanTech</button>
+        <button (click)="setIndustry('Healthcare')" [class.bg-indigo-600]="industry === 'Healthcare'" [class.text-white]="industry === 'Healthcare'" class="px-3 py-1.5 text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-100 transition-all">Healthcare</button>
+        <button (click)="setIndustry('Fintech')" [class.bg-indigo-600]="industry === 'Fintech'" [class.text-white]="industry === 'Fintech'" class="px-3 py-1.5 text-xs font-bold text-slate-600 rounded-xl hover:bg-slate-100 transition-all">Fintech</button>
       </div>
     </header>
 
-    <!-- Manual View Switcher (Debug/Dev Mode) -->
+    <!-- Navigation Switcher -->
     <div class="flex space-x-2 bg-white p-2 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-      <button (click)="currentView = 'dashboard'" [class.bg-indigo-100]="currentView === 'dashboard'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Dashboard</button>
-      <button (click)="currentView = 'startup_sale'" [class.bg-indigo-100]="currentView === 'startup_sale'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Startup Profile</button>
-      <button (click)="currentView = 'partners'" [class.bg-indigo-100]="currentView === 'partners'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Partner Matching</button>
-      <button (click)="currentView = 'market_analysis'" [class.bg-indigo-100]="currentView === 'market_analysis'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Market Analysis</button>
-      <button (click)="currentView = 'pitch_deck'" [class.bg-indigo-100]="currentView === 'pitch_deck'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Pitch Deck</button>
+      <button (click)="currentView = 'dashboard'" [class.bg-indigo-100]="currentView === 'dashboard'" [class.text-indigo-700]="currentView === 'dashboard'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">📊 Dashboard Overview</button>
+      <button (click)="currentView = 'startup_sale'" [class.bg-indigo-100]="currentView === 'startup_sale'" [class.text-indigo-700]="currentView === 'startup_sale'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">➕ Add Startup (MongoDB)</button>
+      <button (click)="currentView = 'partners'" [class.bg-indigo-100]="currentView === 'partners'" [class.text-indigo-700]="currentView === 'partners'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">🤝 Partner Matching</button>
+      <button (click)="currentView = 'market_analysis'" [class.bg-indigo-100]="currentView === 'market_analysis'" [class.text-indigo-700]="currentView === 'market_analysis'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">📈 Market Analysis</button>
+      <button (click)="currentView = 'pitch_deck'" [class.bg-indigo-100]="currentView === 'pitch_deck'" [class.text-indigo-700]="currentView === 'pitch_deck'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">🚀 Pitch Deck</button>
     </div>
 
-    <!-- Dynamic Content Area based on AGUI Navigation -->
+    <!-- Dynamic Content Area -->
     <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
       <!-- Partners View -->
@@ -35,21 +41,102 @@
       <app-pitch-deck *ngIf="currentView === 'pitch_deck'" class="col-span-3"></app-pitch-deck>
       
       <!-- Startup Submission View -->
-      <app-startup-form *ngIf="currentView === 'startup_sale'" class="col-span-3"></app-startup-form>
+      <app-startup-form *ngIf="currentView === 'startup_sale'" (startupCreated)="onStartupCreated($event)" class="col-span-3"></app-startup-form>
 
       <!-- Dashboard Default View -->
       <ng-container *ngIf="currentView === 'dashboard'">
-        <div class="glass p-6 rounded-3xl shadow-lg bg-white">
-          <h3 class="text-lg font-bold text-slate-700">Total Funding</h3>
-          <p class="text-4xl font-extrabold text-indigo-600 mt-2">$2.4M</p>
+        <!-- Stat Cards -->
+        <div class="p-6 rounded-3xl shadow-md bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-indigo-100 uppercase tracking-wider">Startups in MongoDB</h3>
+            <span class="p-2 bg-indigo-400/30 rounded-xl text-lg">⚡</span>
+          </div>
+          <p class="text-4xl font-extrabold mt-3">{{ startups.length }}</p>
+          <p class="text-xs text-indigo-200 mt-2">Active database collections</p>
         </div>
-        <div class="glass p-6 rounded-3xl shadow-lg bg-white">
-          <h3 class="text-lg font-bold text-slate-700">Active Partnerships</h3>
-          <p class="text-4xl font-extrabold text-emerald-500 mt-2">12</p>
+
+        <div class="p-6 rounded-3xl shadow-md bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-emerald-100 uppercase tracking-wider">Active Partnerships</h3>
+            <span class="p-2 bg-emerald-400/30 rounded-xl text-lg">🤝</span>
+          </div>
+          <p class="text-4xl font-extrabold mt-3">12</p>
+          <p class="text-xs text-emerald-200 mt-2">Verified ecosystem matches</p>
         </div>
-        <div class="glass p-6 rounded-3xl shadow-lg bg-white">
-          <h3 class="text-lg font-bold text-slate-700">Market Reach</h3>
-          <p class="text-4xl font-extrabold text-amber-500 mt-2">+45%</p>
+
+        <div class="p-6 rounded-3xl shadow-md bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-amber-100 uppercase tracking-wider">MongoDB Connection</h3>
+            <span class="p-2 bg-amber-400/30 rounded-xl text-lg">🗄️</span>
+          </div>
+          <p class="text-4xl font-extrabold mt-3">CONNECTED</p>
+          <p class="text-xs text-amber-200 mt-2">mongodb://localhost:27017</p>
+        </div>
+
+        <!-- Startups Directory Grid from MongoDB -->
+        <div class="col-span-3 space-y-4 mt-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-slate-800">MongoDB Startup Directory</h2>
+              <p class="text-sm text-slate-500">Live mock data fetched from MongoDB instance</p>
+            </div>
+            <button (click)="loadStartups()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+              🔄 Refresh Data
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="isLoadingStartups" class="p-12 text-center text-slate-400 bg-white rounded-3xl border border-slate-200">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent mb-3"></div>
+            <p class="font-medium text-slate-600">Fetching records from MongoDB...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!isLoadingStartups && startups.length === 0" class="p-12 text-center bg-white rounded-3xl border border-slate-200">
+            <p class="text-slate-500 font-medium">No startups found in MongoDB for industry: <span class="font-bold text-indigo-600">{{ industry }}</span></p>
+            <button (click)="setIndustry('All')" class="mt-4 px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm">View All Startups</button>
+          </div>
+
+          <!-- Startups Cards Grid -->
+          <div *ngIf="!isLoadingStartups && startups.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div *ngFor="let item of startups" class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl border border-slate-100 transition-all flex flex-col justify-between group">
+              <div>
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ item.name }}</h3>
+                    <p class="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                      <span>📍</span> {{ item.location || 'Remote' }}
+                    </p>
+                  </div>
+                  <span class="px-3 py-1 text-xs font-bold rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    {{ item.industry }}
+                  </span>
+                </div>
+
+                <p class="text-slate-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                  {{ item.description }}
+                </p>
+
+                <div *ngIf="item.weakness" class="p-3 bg-amber-50/70 border border-amber-100 rounded-2xl mb-4">
+                  <p class="text-xs font-bold text-amber-800 uppercase tracking-wide mb-0.5">Key Challenge / Need:</p>
+                  <p class="text-xs text-amber-900 leading-snug">{{ item.weakness }}</p>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                <div>
+                  <span class="text-slate-400 block">Funding</span>
+                  <span class="font-bold text-slate-700">{{ item.funding || 'Bootstrapped' }}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-slate-400 block">Match Score</span>
+                  <span class="font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
+                    {{ item.matchScore || 90 }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </ng-container>
 

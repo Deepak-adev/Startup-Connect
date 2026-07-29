@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SocketService } from '../../services/socket.service';
+import { StartupService, Startup } from '../../services/startup.service';
 import { StartupFormComponent } from '../startup-form/startup-form.component';
 import { PartnerMatchingComponent } from '../partner-matching/partner-matching.component';
 import { MarketAnalysisComponent } from '../market-analysis/market-analysis.component';
@@ -17,9 +18,17 @@ export class DashboardComponent implements OnInit {
   currentView: string = 'dashboard';
   industry: string = 'All';
 
-  constructor(private socketService: SocketService) {}
+  startups: Startup[] = [];
+  isLoadingStartups: boolean = true;
+
+  constructor(
+    private socketService: SocketService,
+    private startupService: StartupService
+  ) {}
 
   ngOnInit() {
+    this.loadStartups();
+
     this.socketService.getMessage('chatReply').subscribe(
       (response: any) => {
         try {
@@ -30,6 +39,7 @@ export class DashboardComponent implements OnInit {
             }
             if (jsonResponse.navigation.params.industry) {
               this.industry = jsonResponse.navigation.params.industry;
+              this.loadStartups();
             }
           }
         } catch (e) {
@@ -37,5 +47,29 @@ export class DashboardComponent implements OnInit {
         }
       }
     );
+  }
+
+  loadStartups() {
+    this.isLoadingStartups = true;
+    this.startupService.getStartups(this.industry).subscribe({
+      next: (data) => {
+        this.startups = data;
+        this.isLoadingStartups = false;
+      },
+      error: (err) => {
+        console.error('Failed to load startups from MongoDB:', err);
+        this.isLoadingStartups = false;
+      }
+    });
+  }
+
+  setIndustry(ind: string) {
+    this.industry = ind;
+    this.loadStartups();
+  }
+
+  onStartupCreated(newStartup: Startup) {
+    this.loadStartups();
+    this.currentView = 'dashboard';
   }
 }

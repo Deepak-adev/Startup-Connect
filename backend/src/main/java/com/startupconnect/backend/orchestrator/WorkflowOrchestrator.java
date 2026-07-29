@@ -72,18 +72,56 @@ public class WorkflowOrchestrator {
     }
 
     public Mono<String> processUserInput(String userInput) {
-        // Construct the prompt mimicking the legacy system
         String fullPrompt = SYSTEM_INSTRUCTION + "\n\nUser Input: " + userInput;
         
         return geminiClient.generateContent(fullPrompt)
                 .flatMap(geminiResponse -> {
-                    // Extract the raw JSON
                     String cleanedResponse = geminiResponse.replace("```json", "").replace("```", "").trim();
-                    
-                    // In the future, we can parse this JSON to conditionally trigger LogoAgent or MatchingService
-                    // based on navigation.params.action or navigation.params.view.
-                    // For now, we return the structured JSON directly to the frontend socket, just like the old AGUI.
                     return Mono.just(cleanedResponse);
+                })
+                .onErrorResume(error -> {
+                    System.out.println("Gemini API call failed/offline. Executing smart local AGUI intent parser for: " + userInput);
+                    return Mono.just(parseIntentLocally(userInput));
                 });
+    }
+
+    private String parseIntentLocally(String text) {
+        String lower = text.toLowerCase();
+        String targetView = "dashboard";
+        String targetIndustry = "All";
+        String message = "AGUI engine updated your interface based on your command.";
+
+        if (lower.contains("partner") || lower.contains("match") || lower.contains("collaborat")) {
+            targetView = "partners";
+            message = "Navigating to Partner Matching view for ecosystem synergy.";
+        } else if (lower.contains("market") || lower.contains("analys") || lower.contains("trend") || lower.contains("tam")) {
+            targetView = "market_analysis";
+            message = "Navigating to Market Analysis view to examine growth vectors.";
+        } else if (lower.contains("deck") || lower.contains("pitch") || lower.contains("present")) {
+            targetView = "pitch_deck";
+            message = "Opening Pitch Deck Visualizer for slide generation.";
+        } else if (lower.contains("add") || lower.contains("register") || lower.contains("startup") || lower.contains("sale") || lower.contains("form")) {
+            targetView = "startup_sale";
+            message = "Opening Startup Registration Form to add documents to MongoDB.";
+        }
+
+        if (lower.contains("tech")) targetIndustry = "Technology";
+        else if (lower.contains("clean") || lower.contains("energy")) targetIndustry = "CleanTech";
+        else if (lower.contains("health") || lower.contains("medical")) targetIndustry = "Healthcare";
+        else if (lower.contains("fintech") || lower.contains("bank") || lower.contains("finance")) targetIndustry = "Fintech";
+
+        return String.format("""
+            {
+              "thought": "Parsed local intent for keyword matching",
+              "navigation": {
+                "path": "/dashboard",
+                "params": {
+                  "view": "%s",
+                  "industry": "%s"
+                }
+              },
+              "message": "%s"
+            }
+            """, targetView, targetIndustry, message);
     }
 }

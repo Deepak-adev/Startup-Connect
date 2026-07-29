@@ -3,12 +3,7 @@ package com.startupconnect.backend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(excludeName = {
-    "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration",
-    "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration",
-    "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
-    "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
-})
+@SpringBootApplication
 public class BackendApplication {
 
 	public static void main(String[] args) {

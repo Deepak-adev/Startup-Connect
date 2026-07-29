@@ -21,13 +21,18 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy {
   messages: ChatMessage[] = [];
   userInput: string = '';
   isProcessing: boolean = false;
+  
+  // Slide / Hide state
+  isOpen: boolean = false;
+  unreadCount: number = 0;
+
   private socketSubscription!: Subscription;
 
   constructor(private socketService: SocketService) {}
 
   ngOnInit() {
     this.messages.push({
-      text: "Hello! I am AGUI, your Startup Connect co-pilot. How can I help you today?",
+      text: "Hello! I am AGUI, your Startup Connect co-pilot. Type a command (e.g. 'show tech partners' or 'generate pitch deck') to navigate the portal!",
       isUser: false
     });
 
@@ -35,10 +40,9 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy {
       (response: any) => {
         this.isProcessing = false;
         
-        // Remove processing message if it exists
+        // Remove processing indicator
         this.messages = this.messages.filter(m => !m.isProcessing);
         
-        // Parse AGUI JSON response
         try {
           const jsonResponse = typeof response === 'string' ? JSON.parse(response) : response;
           if (jsonResponse.message) {
@@ -48,14 +52,24 @@ export class ChatInterfaceComponent implements OnInit, OnDestroy {
             });
           }
         } catch (e) {
-          // Fallback if not valid JSON
           this.messages.push({
             text: response.toString(),
             isUser: false
           });
         }
+
+        if (!this.isOpen) {
+          this.unreadCount++;
+        }
       }
     );
+  }
+
+  toggleChat() {
+    this.isOpen = !this.isOpen;
+    if (this.isOpen) {
+      this.unreadCount = 0;
+    }
   }
 
   sendMessage() {
