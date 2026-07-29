@@ -38,7 +38,7 @@ public class StartupController {
 
     @PostMapping
     public Startup createStartup(@RequestBody Startup startup) {
-        if (startup.getMatchScore() == 0) {
+        if (startup.getMatchScore() == null || startup.getMatchScore() == 0) {
             startup.setMatchScore((int) (Math.random() * 20) + 80);
         }
         Startup saved = startupRepository.save(startup);

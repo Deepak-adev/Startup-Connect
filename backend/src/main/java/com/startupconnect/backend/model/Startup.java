@@ -12,14 +12,14 @@ public class Startup {
     private String industry;
     private String description;
     private String weakness;
-    private double revenue;
+    private Double revenue;
     private String funding;
-    private int matchScore;
+    private Integer matchScore;
     private String location;
 
     public Startup() {}
 
-    public Startup(String id, String name, String industry, String description, String weakness, double revenue, String funding, int matchScore, String location) {
+    public Startup(String id, String name, String industry, String description, String weakness, Double revenue, String funding, Integer matchScore, String location) {
         this.id = id;
         this.name = name;
         this.industry = industry;
@@ -71,11 +71,11 @@ public class Startup {
         this.weakness = weakness;
     }
 
-    public double getRevenue() {
+    public Double getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(double revenue) {
+    public void setRevenue(Double revenue) {
         this.revenue = revenue;
     }
 
@@ -87,11 +87,11 @@ public class Startup {
         this.funding = funding;
     }
 
-    public int getMatchScore() {
+    public Integer getMatchScore() {
         return matchScore;
     }
 
-    public void setMatchScore(int matchScore) {
+    public void setMatchScore(Integer matchScore) {
         this.matchScore = matchScore;
     }
 
