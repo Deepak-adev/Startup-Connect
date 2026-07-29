@@ -1,0 +1,22 @@
+<div class="glass p-8 rounded-3xl shadow-xl bg-white w-full">
+  <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+    <h2 class="text-2xl font-extrabold text-slate-800">Market Analysis: <span class="text-indigo-600">{{ industry }}</span></h2>
+    <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-bold rounded-full">Live Data</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div *ngFor="let metric of marketData" class="p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+      <h4 class="text-sm font-bold text-slate-500 mb-2">{{ metric.label }}</h4>
+      <div class="flex items-end space-x-3">
+        <span class="text-3xl font-black text-slate-800">{{ metric.value }}</span>
+        <span class="text-green-500 font-bold mb-1">{{ metric.trend }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-64 bg-slate-50 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden">
+    <!-- Faux Chart Lines -->
+    <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDQwaDQwdjRIMEoiIGZpbGw9IiM0ZjQ2ZTUiIGZpbGwtb3BhY2l0eT0iMSIgZmlsbC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPg==')]"></div>
+    <span class="text-slate-400 font-semibold z-10 bg-white/80 px-4 py-2 rounded-lg">Interactive Chart Rendering Engine Active</span>
+  </div>
+</div>

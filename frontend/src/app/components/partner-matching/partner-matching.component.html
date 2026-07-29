@@ -1,0 +1,18 @@
+<div class="col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div *ngFor="let partner of filteredPartners" class="glass p-6 rounded-3xl border border-white shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 bg-gradient-to-br from-white to-spark-blue/30">
+    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    </div>
+    <h3 class="text-xl font-bold text-slate-800">{{ partner.name }}</h3>
+    <span class="inline-block mt-1 px-2 py-1 text-xs font-semibold bg-white/50 text-slate-600 rounded-full border border-slate-200">{{ partner.industry }}</span>
+    <p class="text-slate-500 text-sm mt-3">{{ partner.desc }}</p>
+    <div class="mt-5 pt-4 border-t border-slate-100/50 flex justify-between items-center">
+      <span class="text-green-500 font-extrabold text-lg">{{ partner.match }}% Match</span>
+      <button class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-md transition-colors">Connect</button>
+    </div>
+  </div>
+  
+  <div *ngIf="filteredPartners.length === 0" class="col-span-3 p-12 text-center glass rounded-3xl">
+    <p class="text-slate-500 text-lg">No partners found for industry: <strong>{{ industry }}</strong></p>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-slate-50 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <header class="flex items-center justify-between">
+      <div>
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Startup Connect</h1>
+        <p class="text-slate-500 mt-1">Empower Your Spark. Current View: <span class="font-bold text-indigo-600 capitalize">{{ currentView }}</span></p>
+      </div>
+      <div class="px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-200">
+        <span class="text-sm font-medium text-slate-600">Industry Filter: </span>
+        <span class="text-sm font-bold text-indigo-600">{{ industry }}</span>
+      </div>
+    </header>
+
+    <!-- Manual View Switcher (Debug/Dev Mode) -->
+    <div class="flex space-x-2 bg-white p-2 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+      <button (click)="currentView = 'dashboard'" [class.bg-indigo-100]="currentView === 'dashboard'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Dashboard</button>
+      <button (click)="currentView = 'startup_sale'" [class.bg-indigo-100]="currentView === 'startup_sale'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Startup Profile</button>
+      <button (click)="currentView = 'partners'" [class.bg-indigo-100]="currentView === 'partners'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Partner Matching</button>
+      <button (click)="currentView = 'market_analysis'" [class.bg-indigo-100]="currentView === 'market_analysis'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Market Analysis</button>
+      <button (click)="currentView = 'pitch_deck'" [class.bg-indigo-100]="currentView === 'pitch_deck'" class="px-4 py-2 text-sm font-semibold text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">Pitch Deck</button>
+    </div>
+
+    <!-- Dynamic Content Area based on AGUI Navigation -->
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Partners View -->
+      <app-partner-matching *ngIf="currentView === 'partners'" [industry]="industry" class="col-span-3"></app-partner-matching>
+
+      <!-- Market Analysis View -->
+      <app-market-analysis *ngIf="currentView === 'market_analysis'" [industry]="industry" class="col-span-3"></app-market-analysis>
+      
+      <!-- Pitch Deck View -->
+      <app-pitch-deck *ngIf="currentView === 'pitch_deck'" class="col-span-3"></app-pitch-deck>
+      
+      <!-- Startup Submission View -->
+      <app-startup-form *ngIf="currentView === 'startup_sale'" class="col-span-3"></app-startup-form>
+
+      <!-- Dashboard Default View -->
+      <ng-container *ngIf="currentView === 'dashboard'">
+        <div class="glass p-6 rounded-3xl shadow-lg bg-white">
+          <h3 class="text-lg font-bold text-slate-700">Total Funding</h3>
+          <p class="text-4xl font-extrabold text-indigo-600 mt-2">$2.4M</p>
+        </div>
+        <div class="glass p-6 rounded-3xl shadow-lg bg-white">
+          <h3 class="text-lg font-bold text-slate-700">Active Partnerships</h3>
+          <p class="text-4xl font-extrabold text-emerald-500 mt-2">12</p>
+        </div>
+        <div class="glass p-6 rounded-3xl shadow-lg bg-white">
+          <h3 class="text-lg font-bold text-slate-700">Market Reach</h3>
+          <p class="text-4xl font-extrabold text-amber-500 mt-2">+45%</p>
+        </div>
+      </ng-container>
+
+    </main>
+  </div>
+</div>
