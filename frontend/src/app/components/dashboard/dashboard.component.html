@@ -1,11 +1,26 @@
 <div class="min-h-screen bg-slate-50 p-8">
   <div class="max-w-7xl mx-auto space-y-8">
-    
+
+    <!-- Real-time Toast Notification -->
+    <div *ngIf="realtimeToast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-6 py-3.5 bg-slate-900 text-white text-sm font-semibold rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-in slide-in-from-top-3 duration-300">
+      <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      {{ realtimeToast }}
+    </div>
+
     <!-- Header -->
     <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div>
         <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Startup Connect</h1>
-        <p class="text-slate-500 mt-1">Empower Your Spark. Current View: <span class="font-bold text-indigo-600 capitalize">{{ currentView }}</span></p>
+        <div class="flex items-center gap-3 mt-1">
+          <p class="text-slate-500">Empower Your Spark. View: <span class="font-bold text-indigo-600 capitalize">{{ currentView }}</span></p>
+          <!-- Live Socket Connection Status -->
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
+                [ngClass]="isSocketConnected ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'">
+            <span class="h-1.5 w-1.5 rounded-full"
+                  [ngClass]="isSocketConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'"></span>
+            {{ isSocketConnected ? 'Live Sync Active' : 'Reconnecting...' }}
+          </span>
+        </div>
       </div>
       
       <!-- Industry Quick Filter Badges -->

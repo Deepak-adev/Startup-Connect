@@ -20,6 +20,11 @@ export class DashboardComponent implements OnInit {
 
   startups: Startup[] = [];
   isLoadingStartups: boolean = true;
+  isSocketConnected: boolean = false;
+
+  // Real-time toast
+  realtimeToast: string = '';
+  private toastTimer: any;
 
   constructor(
     private socketService: SocketService,
@@ -47,6 +52,27 @@ export class DashboardComponent implements OnInit {
         }
       }
     );
+
+    // --- Real-time: new startup created by any connected client ---
+    this.socketService.onStartupCreated().subscribe((newStartup: any) => {
+      const exists = this.startups.some(s => s.id === newStartup.id);
+      if (!exists) {
+        this.startups = [newStartup, ...this.startups];
+        this.showToast(`🚀 New startup joined: ${newStartup.name}`);
+      }
+    });
+
+    // --- Real-time: socket connection status ---
+    this.socketService.onConnectionStatus().subscribe(status => {
+      this.isSocketConnected = status === 'connected';
+    });
+    this.isSocketConnected = this.socketService.isConnected;
+  }
+
+  showToast(message: string) {
+    this.realtimeToast = message;
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => { this.realtimeToast = ''; }, 4000);
   }
 
   loadStartups() {
@@ -69,7 +95,9 @@ export class DashboardComponent implements OnInit {
   }
 
   onStartupCreated(newStartup: Startup) {
-    this.loadStartups();
+    // The real-time socket broadcast will handle the grid update for all clients.
+    // Switch view back to dashboard for the submitter.
     this.currentView = 'dashboard';
+    this.showToast(`✅ "${newStartup.name}" saved to MongoDB!`);
   }
 }

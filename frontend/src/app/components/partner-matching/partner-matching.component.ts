@@ -1,7 +1,9 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { PartnerService, Partner } from '../../services/partner.service';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-partner-matching',
@@ -10,7 +12,7 @@ import { PartnerService, Partner } from '../../services/partner.service';
   templateUrl: './partner-matching.component.html',
   styleUrls: ['./partner-matching.component.css']
 })
-export class PartnerMatchingComponent implements OnChanges {
+export class PartnerMatchingComponent implements OnInit, OnChanges, OnDestroy {
   @Input() industry: string = 'All';
 
   partners: Partner[] = [];
@@ -23,10 +25,28 @@ export class PartnerMatchingComponent implements OnChanges {
   isConnecting: boolean = false;
   connectSuccessMsg: string = '';
 
-  constructor(private partnerService: PartnerService) {}
+  realtimeToast: string = '';
+  private toastTimer: any;
+  private realtimeSub!: Subscription;
+
+  constructor(private partnerService: PartnerService, private socketService: SocketService) {}
 
   ngOnInit() {
     this.loadPartners();
+
+    // Real-time: when any client connects with a partner, sync status for all
+    this.realtimeSub = this.socketService.onPartnerConnected().subscribe(event => {
+      this.partners = this.partners.map(p =>
+        p.id === event.partnerId ? { ...p, connected: true } : p
+      );
+      this.showToast(`🤝 ${event.partnerName} connected by another user!`);
+    });
+  }
+
+  showToast(message: string) {
+    this.realtimeToast = message;
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => { this.realtimeToast = ''; }, 3500);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -98,5 +118,9 @@ export class PartnerMatchingComponent implements OnChanges {
         }, 1500);
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.realtimeSub) this.realtimeSub.unsubscribe();
   }
 }

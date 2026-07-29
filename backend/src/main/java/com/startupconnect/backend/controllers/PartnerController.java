@@ -3,10 +3,12 @@ package com.startupconnect.backend.controllers;
 import com.startupconnect.backend.model.PartnerConnection;
 import com.startupconnect.backend.model.Startup;
 import com.startupconnect.backend.repository.StartupRepository;
+import com.startupconnect.backend.services.BroadcasterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @RestController
 @RequestMapping("/api/partners")
@@ -14,10 +16,14 @@ import java.util.*;
 public class PartnerController {
 
     private final StartupRepository startupRepository;
-    private final List<PartnerConnection> connections = new ArrayList<>();
+    private final BroadcasterService broadcasterService;
+    
+    // Thread-safe collection for concurrent connection state management
+    private final CopyOnWriteArrayList<PartnerConnection> connections = new CopyOnWriteArrayList<>();
 
-    public PartnerController(StartupRepository startupRepository) {
+    public PartnerController(StartupRepository startupRepository, BroadcasterService broadcasterService) {
         this.startupRepository = startupRepository;
+        this.broadcasterService = broadcasterService;
     }
 
     @GetMapping("/match")
@@ -33,42 +39,10 @@ public class PartnerController {
         
         // Base ecosystem partners
         List<Map<String, Object>> basePartners = List.of(
-            Map.of(
-                "id", "partner-tech-1",
-                "name", "Tech Innovators Global",
-                "industry", "Technology",
-                "match", 98,
-                "desc", "Specialized in cloud microservices and AI agent integrations for B2B platforms.",
-                "verified", true,
-                "location", "San Francisco, CA"
-            ),
-            Map.of(
-                "id", "partner-clean-2",
-                "name", "EcoGrid Ventures",
-                "industry", "CleanTech",
-                "match", 94,
-                "desc", "Renewable energy equipment distribution and smart-meter grid software integration.",
-                "verified", true,
-                "location", "Austin, TX"
-            ),
-            Map.of(
-                "id", "partner-health-3",
-                "name", "Acme Health Systems",
-                "industry", "Healthcare",
-                "match", 91,
-                "desc", "Hospital distribution network with active digital health co-investment fund.",
-                "verified", true,
-                "location", "Boston, MA"
-            ),
-            Map.of(
-                "id", "partner-fin-4",
-                "name", "Apex Global Capital",
-                "industry", "Fintech",
-                "match", 96,
-                "desc", "Institutional liqudity & automated banking API sandbox for scaling startups.",
-                "verified", true,
-                "location", "New York, NY"
-            )
+            Map.of("id", "partner-tech-1", "name", "Tech Innovators Global", "industry", "Technology", "match", 98, "desc", "Specialized in cloud microservices and AI agent integrations for B2B platforms.", "verified", true, "location", "San Francisco, CA"),
+            Map.of("id", "partner-clean-2", "name", "EcoGrid Ventures", "industry", "CleanTech", "match", 94, "desc", "Renewable energy equipment distribution and smart-meter grid software integration.", "verified", true, "location", "Austin, TX"),
+            Map.of("id", "partner-health-3", "name", "Acme Health Systems", "industry", "Healthcare", "match", 91, "desc", "Hospital distribution network with active digital health co-investment fund.", "verified", true, "location", "Boston, MA"),
+            Map.of("id", "partner-fin-4", "name", "Apex Global Capital", "industry", "Fintech", "match", 96, "desc", "Institutional liquidity & automated banking API sandbox for scaling startups.", "verified", true, "location", "New York, NY")
         );
 
         for (Map<String, Object> p : basePartners) {
@@ -80,7 +54,6 @@ public class PartnerController {
             }
         }
 
-        // Convert MongoDB startups to potential partner matches as well
         for (Startup s : startups) {
             Map<String, Object> pMap = new HashMap<>();
             pMap.put("id", s.getId() != null ? s.getId() : s.getName().toLowerCase().replace(" ", "-"));
@@ -100,7 +73,11 @@ public class PartnerController {
     @PostMapping("/connect")
     public ResponseEntity<Map<String, Object>> connectWithPartner(@RequestBody PartnerConnection connection) {
         connection.setStatus("CONNECTED");
+        // Thread-safe add via CopyOnWriteArrayList
         connections.add(connection);
+
+        // Asynchronously broadcast to ALL connected clients in real-time
+        broadcasterService.broadcastPartnerConnected(connection);
 
         Map<String, Object> resp = Map.of(
             "success", true,
