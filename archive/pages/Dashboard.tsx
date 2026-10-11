@@ -190,11 +190,8 @@ Your goal is to translate user intent into structured JSON actions to drive the 
                     </button>
                 </div>
 
-                {/* Panel A: Dynamic Workspace */}
-                <div className={cn(
-                    "flex-1 h-full relative z-0 bg-slate-50 transition-all duration-500 ease-in-out",
-                    isAguiOpen ? "md:flex-[2] lg:flex-[3]" : "md:flex-1"
-                )}>
+                {/* Main Workspace */}
+                <div className="flex-1 h-full relative z-0 bg-slate-50 transition-all duration-500 ease-in-out overflow-y-auto overflow-x-hidden">
                     <DynamicWorkspace />
 
                     {/* Floating Toggle Button (Visible only when AGUI is closed) */}
@@ -202,7 +199,7 @@ Your goal is to translate user intent into structured JSON actions to drive the 
                         <button
                             onClick={() => setIsAguiOpen(true)}
                             className={cn(
-                                "absolute bottom-6 right-6 z-50 bg-white text-slate-900 shadow-2xl rounded-full p-4 flex items-center gap-3 border border-slate-200 hover:scale-105 transition-transform animate-in slide-in-from-bottom-5",
+                                "fixed bottom-6 right-6 z-50 bg-white text-slate-900 shadow-2xl rounded-full p-4 flex items-center gap-3 border border-slate-200 hover:scale-105 transition-transform animate-in slide-in-from-bottom-5",
                                 isInvestor ? "hover:border-emerald-500 hover:text-emerald-600" : "hover:border-indigo-500 hover:text-indigo-600"
                             )}
                         >
@@ -212,37 +209,39 @@ Your goal is to translate user intent into structured JSON actions to drive the 
                             )}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                             </div>
-                            <span className="font-bold pr-2">Ask AGUI</span>
+                            <span className="font-bold pr-2 hidden md:inline-block">Ask AGUI</span>
                         </button>
                     )}
                 </div>
 
-                {/* Panel B: AGUI Chat */}
+                {/* Floating AGUI Chat Popup */}
                 <div className={cn(
-                    "border-l border-slate-200 shadow-2xl z-40 relative transition-all duration-500 ease-in-out bg-white",
-                    isAguiOpen ? "w-full md:w-[400px] lg:w-[450px] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0 overflow-hidden border-0"
+                    "fixed bottom-6 right-6 z-50 transition-all duration-300 ease-in-out bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-slate-200 overflow-hidden flex flex-col origin-bottom-right",
+                    isAguiOpen ? "scale-100 opacity-100 w-[90vw] md:w-[400px] lg:w-[450px] h-[600px] max-h-[85vh]" : "scale-50 opacity-0 w-0 h-0 pointer-events-none"
                 )}>
-                    <div className="h-full w-full md:w-[400px] lg:w-[450px]">
-                        {contextData ? (
-                            <AGUIChat
-                                systemInstruction={systemInstruction}
-                                initialMessage={initialMessage}
-                                onClose={() => setIsAguiOpen(false)}
-                            />
-                        ) : (
-                            <div className="flex h-full items-center justify-center bg-white">
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className={cn(
-                                        "h-8 w-8 animate-spin rounded-full border-4 border-t-transparent",
-                                        isInvestor ? "border-emerald-600" : "border-indigo-600"
-                                    )}></div>
-                                    <p className="text-sm font-medium text-slate-500">
-                                        Loading your {isInvestor ? 'investor' : 'startup'} context...
-                                    </p>
+                    {isAguiOpen && (
+                        <div className="flex-1 w-full h-full">
+                            {contextData ? (
+                                <AGUIChat
+                                    systemInstruction={systemInstruction}
+                                    initialMessage={initialMessage}
+                                    onClose={() => setIsAguiOpen(false)}
+                                />
+                            ) : (
+                                <div className="flex h-full items-center justify-center bg-white">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className={cn(
+                                            "h-8 w-8 animate-spin rounded-full border-4 border-t-transparent",
+                                            isInvestor ? "border-emerald-600" : "border-indigo-600"
+                                        )}></div>
+                                        <p className="text-sm font-medium text-slate-500">
+                                            Loading your {isInvestor ? 'investor' : 'startup'} context...
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
             </main>

@@ -31,8 +31,12 @@ export default function Login() {
 
       <div className="w-full max-w-md p-8 relative z-10">
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-pink-500 mb-6 shadow-xl shadow-indigo-500/20">
-            <Sparkles className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 shadow-xl shadow-indigo-500/20">
+            <img 
+                src="/logo.png" 
+                alt="Startup Connect Logo" 
+                className="w-16 h-16 object-contain"
+            />
           </div>
           <h1 className="text-4xl font-display font-bold text-slate-900 mb-2 tracking-tight">Welcome Back</h1>
           <p className="text-slate-500 text-lg">Sign in to access your {userType} dashboard</p>

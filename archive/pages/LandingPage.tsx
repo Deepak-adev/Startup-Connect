@@ -60,12 +60,13 @@ export default function LandingPage() {
             )}>
                 <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     <div className="flex items-center gap-2 group cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-                            <Sparkles className="w-6 h-6 text-white" />
-                        </div>
+                        <img 
+                            src="/logo.png" 
+                            alt="Startup Connect Logo" 
+                            className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-300"
+                        />
                         <div className="flex flex-col">
                             <span className="text-xl font-bold font-display text-slate-900 leading-none">Startup Connect</span>
-                            <span className="text-[10px] font-medium text-slate-500 tracking-wider">by HackNexa</span>
                         </div>
                     </div>
 
@@ -527,7 +528,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium">
-                        <div>© 2026 Startup Connect by HackNexa. All rights reserved.</div>
+                        <div>© 2026 Startup Connect. All rights reserved.</div>
                         <div className="flex gap-6">
                             <a href="#" className="hover:text-white">Privacy Policy</a>
                             <a href="#" className="hover:text-white">Terms of Service</a>

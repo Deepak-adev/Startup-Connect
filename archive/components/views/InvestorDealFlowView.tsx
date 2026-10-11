@@ -397,7 +397,7 @@ DATE: ${new Date().toLocaleDateString()}
 
             {/* Toast Notification */}
             {notification && (
-                <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in slide-in-from-bottom-4">
+                <div className="fixed bottom-6 left-6 z-50 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in slide-in-from-bottom-4">
                     <Zap size={16} className="text-yellow-400" />
                     {notification}
                 </div>
