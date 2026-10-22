@@ -43,25 +43,11 @@ export default function InvestorInquiry() {
                 const extractedProfile = await generateInvestorProfileFromChat(chatMessages);
                 await handleAnalysisComplete(extractedProfile);
             } else {
-                const mockInvestorProfile = {
-                    name: "Venture Capital Partners",
-                    type: "VC Firm",
-                    thesis: "Investing in early-stage AI and GreenTech startups.",
-                    ticketSize: { min: "$100K", max: "$2M" },
-                    industries: ["AI", "GreenTech", "SaaS"]
-                };
-                await handleAnalysisComplete(mockInvestorProfile);
+                alert("Please chat with AGUI first to provide details about your investment thesis before completing discovery.");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Analysis failed", error);
-            const mockInvestorProfile = {
-                name: "Venture Capital Partners",
-                type: "VC Firm",
-                thesis: "Investing in early-stage AI and GreenTech startups.",
-                ticketSize: { min: "$100K", max: "$2M" },
-                industries: ["AI", "GreenTech", "SaaS"]
-            };
-            await handleAnalysisComplete(mockInvestorProfile);
+            alert(`Discovery failed: ${error?.message || "Could not connect to AI. Please check your API key."}`);
         } finally {
             setIsAnalyzing(false);
         }

@@ -125,8 +125,14 @@ export const sendMessageToAGUI = async (
   newMessage: string,
   systemInstruction?: string
 ): Promise<AGUIResponse> => {
-  // Check if we have a Groq key (starts with gsk_) or default to Groq
   const groqKey = getGroqApiKey();
+  const geminiKey = getApiKey();
+
+  if (!groqKey && !geminiKey) {
+    throw new Error("API Key not found. Please configure GROQ_API_KEY or GEMINI_API_KEY in your environment variables or settings.");
+  }
+
+  // Check if we have a Groq key (starts with gsk_) or default to Groq
   if (groqKey) {
     try {
       const groqMessages = [
@@ -141,31 +147,15 @@ export const sendMessageToAGUI = async (
       const content = await callGroqAI(groqMessages, true);
       const cleanedText = content.replace(/```json/g, '').replace(/```/g, '').trim();
       return JSON.parse(cleanedText) as AGUIResponse;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Groq AGUI Error:", err);
+      throw new Error(`AI Service Error: ${err?.message || "Failed to get response from Groq API"}`);
     }
   }
 
   const ai = getClient();
-
   if (!ai) {
-    // Fallback questionnaire if no key works
-    const userRepliesCount = history.filter(m => m.role === 'user').length;
-    const questions = [
-      "Great to hear! Could you describe the innovative solution or product you are building to address this?",
-      "Who is your primary target audience and what geography are you focusing on first?",
-      "What is your revenue model (e.g. subscription, transaction fee, direct sales)?",
-      "What stage is your startup currently in (Idea, MVP, or already generating revenue)?",
-      "How much funding are you planning to raise and who are your main competitors?",
-      "Awesome! We have captured the core details of your startup. Click 'Complete Analysis' to view your generated dashboard and pitch materials!"
-    ];
-    const nextQuestion = questions[Math.min(userRepliesCount, questions.length - 1)];
-
-    return {
-      thought: "No API key configured; serving simulated questionnaire.",
-      message: nextQuestion,
-      navigation: userRepliesCount >= 4 ? { path: "/app" } : undefined
-    };
+    throw new Error("No valid AI client available. Please check your API key configuration.");
   }
 
   // Construct the conversation history for the context
@@ -195,13 +185,9 @@ export const sendMessageToAGUI = async (
     const cleanedText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanedText) as AGUIResponse;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("AGUI Error:", error);
-    return {
-      thought: "Error in processing",
-      message: "I'm having trouble connecting to my neural core. Please check your API key, or use 'Complete Analysis' at any time.",
-      navigation: undefined
-    };
+    throw new Error(`Gemini Error: ${error?.message || "Failed to get response from Gemini API"}`);
   }
 };
 
@@ -250,21 +236,15 @@ export const generateProfileFromChat = async (history: ChatMessage[]): Promise<a
       const content = await callGroqAI(groqMessages, true);
       const cleanedText = content.replace(/```json/g, '').replace(/```/g, '').trim();
       return JSON.parse(cleanedText);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Groq Profile Extraction Error:", err);
+      throw new Error(`Profile Extraction Failed: ${err?.message || "Groq AI could not process the profile."}`);
     }
   }
 
   const ai = getClient();
   if (!ai) {
-    return {
-      name: "New Startup",
-      industry: "Technology / AI",
-      stage: "Idea / MVP",
-      description: "A forward-thinking startup building intelligent software solutions.",
-      targetAudience: "Modern businesses and innovators",
-      metrics: { tam: "$10B", sam: "$2B", som: "$100M" }
-    };
+    throw new Error("No API key available to extract profile. Please set your API key in environment variables or settings.");
   }
 
   // Convert history for the model
@@ -362,20 +342,15 @@ export const generateInvestorProfileFromChat = async (history: ChatMessage[]): P
       const content = await callGroqAI(groqMessages, true);
       const cleanedText = content.replace(/```json/g, '').replace(/```/g, '').trim();
       return JSON.parse(cleanedText);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Groq Investor Extraction Error:", err);
+      throw new Error(`Investor Profile Extraction Failed: ${err?.message || "Groq AI could not process investor data."}`);
     }
   }
 
   const ai = getClient();
   if (!ai) {
-    return {
-      name: "Venture Capital Partners",
-      type: "VC Firm",
-      thesis: "Investing in early-stage AI and High-growth Tech startups.",
-      ticketSize: { min: "$100K", max: "$2M" },
-      industries: ["AI", "SaaS", "FinTech"]
-    };
+    throw new Error("No API key available to extract investor profile. Please configure GROQ_API_KEY or GEMINI_API_KEY.");
   }
 
   const conversation = history.map(msg => ({

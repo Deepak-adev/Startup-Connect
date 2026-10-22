@@ -67,8 +67,10 @@ export default function AGUIChat({ fullScreenMode = false, initialMessage, syste
         setSearchParams(newParams);
       }
       setMessages(prev => [...prev, { role: 'model', text: response.message }]);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Chat Error:", err);
+      const errorMessage = err?.message || "Failed to communicate with AI. Please verify your API Key.";
+      setMessages(prev => [...prev, { role: 'model', text: `⚠️ Error: ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }

@@ -31,37 +31,11 @@ export default function BusinessInquiry() {
                 const extractedProfile = await generateProfileFromChat(chatMessages);
                 await handleAnalysisComplete(extractedProfile);
             } else {
-                // Fallback to mock data if no conversation happened
-                const mockProfile = {
-                    name: "FlareUp",
-                    industry: "SaaS / AI",
-                    stage: "Idea/Pre-Seed",
-                    description: "AI-driven platform for unmatched startup profile building and market analysis.",
-                    targetAudience: "Early-stage founders",
-                    metrics: {
-                        tam: "$50B",
-                        sam: "$10B",
-                        som: "$100M"
-                    }
-                };
-                await handleAnalysisComplete(mockProfile);
+                alert("Please chat with AGUI first to share details about your business before completing analysis.");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Analysis failed", error);
-            // Fallback on error
-            const mockProfile = {
-                name: "FlareUp",
-                industry: "SaaS / AI",
-                stage: "Idea/Pre-Seed",
-                description: "AI-driven platform for unmatched startup profile building and market analysis.",
-                targetAudience: "Early-stage founders",
-                metrics: {
-                    tam: "$50B",
-                    sam: "$10B",
-                    som: "$100M"
-                }
-            };
-            await handleAnalysisComplete(mockProfile);
+            alert(`Analysis failed: ${error?.message || "Could not connect to AI. Please check your API key."}`);
         } finally {
             setIsAnalyzing(false);
         }
