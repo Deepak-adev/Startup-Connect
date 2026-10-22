@@ -45,23 +45,51 @@ DO NOT use Markdown code blocks. Output raw JSON.
 `;
 
 export const getApiKey = (): string => {
-  return (
-    (typeof process !== 'undefined' && process.env?.API_KEY) ||
-    (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ||
-    (typeof process !== 'undefined' && process.env?.GROQ_API_KEY) ||
-    (import.meta as any).env?.VITE_GEMINI_API_KEY ||
-    (import.meta as any).env?.VITE_GROQ_API_KEY ||
-    (typeof window !== 'undefined' && (localStorage.getItem('GROQ_API_KEY') || localStorage.getItem('GEMINI_API_KEY'))) ||
-    ''
-  );
+  try {
+    const metaEnv = (import.meta as any)?.env || {};
+    const procEnv = typeof process !== 'undefined' ? process.env : {} as any;
+    const localGroq = typeof window !== 'undefined' ? localStorage.getItem('GROQ_API_KEY') : null;
+    const localGemini = typeof window !== 'undefined' ? localStorage.getItem('GEMINI_API_KEY') : null;
+
+    return (
+      metaEnv.VITE_GROQ_API_KEY ||
+      metaEnv.VITE_GEMINI_API_KEY ||
+      metaEnv.GROQ_API_KEY ||
+      metaEnv.GEMINI_API_KEY ||
+      metaEnv.API_KEY ||
+      procEnv?.GROQ_API_KEY ||
+      procEnv?.GEMINI_API_KEY ||
+      procEnv?.API_KEY ||
+      localGroq ||
+      localGemini ||
+      ''
+    );
+  } catch {
+    return '';
+  }
 };
 
 export const getGroqApiKey = (): string => {
-  return (
-    (typeof process !== 'undefined' && (process.env?.GROQ_API_KEY || process.env?.API_KEY)) ||
-    (typeof window !== 'undefined' && localStorage.getItem('GROQ_API_KEY')) ||
-    ''
-  );
+  try {
+    const metaEnv = (import.meta as any)?.env || {};
+    const procEnv = typeof process !== 'undefined' ? process.env : {} as any;
+    const localGroq = typeof window !== 'undefined' ? localStorage.getItem('GROQ_API_KEY') : null;
+
+    const key = (
+      metaEnv.VITE_GROQ_API_KEY ||
+      metaEnv.GROQ_API_KEY ||
+      procEnv?.GROQ_API_KEY ||
+      procEnv?.API_KEY ||
+      metaEnv.API_KEY ||
+      localGroq ||
+      ''
+    );
+
+    // If key starts with gsk_ or if no Gemini key, treat as Groq
+    return key;
+  } catch {
+    return '';
+  }
 };
 
 // Direct Groq API client with auto-fallback across production models
