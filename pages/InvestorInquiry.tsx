@@ -73,38 +73,18 @@ export default function InvestorInquiry() {
     };
 
     return (
-        <div className="h-screen w-full bg-slate-50 flex flex-col relative overflow-hidden">
-            {step === 'chat' && (
-                <div className="absolute top-4 right-4 z-50">
-                    <button
-                        onClick={handleComplete}
-                        disabled={isAnalyzing}
-                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-emerald-600 font-medium shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {isAnalyzing ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span>Analyzing...</span>
-                            </>
-                        ) : (
-                            <>
-                                <span>Complete Profile</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
-
-            <div className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 flex flex-col min-h-0">
-                <div className="text-center mb-6 flex-shrink-0">
-                    <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900">
-                        {step === 'register' ? 'Join as an Investor' : 'Define Your Investment Thesis'}
-                    </h2>
-                    <p className="text-slate-500 mt-2">
-                        {step === 'register' ? 'Access exclusive deal flow and startup analytics.' : "I'll help curate the best startups for your portfolio."}
-                    </p>
-                </div>
+        <div className="min-h-screen w-full bg-slate-50 flex flex-col relative overflow-y-auto pb-10">
+            <div className={`flex-1 w-full ${step === 'register' ? 'max-w-5xl mx-auto p-4 md:p-8 flex flex-col justify-center' : 'max-w-5xl mx-auto p-4 md:p-6 flex flex-col min-h-[650px]'}`}>
+                {step === 'register' && (
+                    <div className="text-center mb-6 flex-shrink-0">
+                        <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900">
+                            Join as an Investor
+                        </h2>
+                        <p className="text-slate-500 mt-2">
+                            Access exclusive deal flow and startup analytics.
+                        </p>
+                    </div>
+                )}
 
                 {step === 'register' ? (
                     <div className="w-full max-w-md mx-auto bg-white border border-slate-200 rounded-2xl p-8 shadow-xl shadow-slate-200/50 overflow-y-auto">
@@ -146,6 +126,25 @@ export default function InvestorInquiry() {
                             fullScreenMode={true}
                             onAnalysisComplete={handleAnalysisComplete}
                             onMessagesChange={setChatMessages}
+                            headerAction={
+                                <button
+                                    onClick={handleComplete}
+                                    disabled={isAnalyzing}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                                >
+                                    {isAnalyzing ? (
+                                        <>
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                            <span>Analyzing...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Complete Profile</span>
+                                            <ArrowRight className="w-3.5 h-3.5" />
+                                        </>
+                                    )}
+                                </button>
+                            }
                             initialMessage="Welcome Partner. To tailor the deal flow to your needs, I need to understand your investment criteria. What is your primary investment thesis?"
                             systemInstruction={`
 You are AGUI, an expert investment analyst assisting a new investor onboarding.

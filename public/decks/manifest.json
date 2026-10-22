@@ -1,0 +1,345 @@
+[
+  {
+    "id": "agrisense",
+    "title": "AgriSense: Precision Farming & Water Conservation",
+    "filename": "AgriSense-Cultivating-a-Sustainable-Future.pptx",
+    "totalSlides": 10,
+    "slides": [
+      {
+        "slideNumber": 1,
+        "title": "AgriSense: Cultivating a Sustainable Future",
+        "subtitle": "AgriSense is revolutionizing agriculture with an innovative IoT sensor network designed for precision farming. Our technology delivers significant reductions in water usage, particularly in arid climates, paving the way for more sustainable and efficient food production.",
+        "content": "AgriSense is revolutionizing agriculture with an innovative IoT sensor network designed for precision farming. Our technology delivers significant reductions in water usage, particularly in arid climates, paving the way for more sustainable and efficient food production.",
+        "allTexts": [
+          "AgriSense: Cultivating a Sustainable Future",
+          "AgriSense is revolutionizing agriculture with an innovative IoT sensor network designed for precision farming. Our technology delivers significant reductions in water usage, particularly in arid climates, paving the way for more sustainable and efficient food production."
+        ],
+        "imageUrl": "/decks/agrisense/image-1-1.png",
+        "speakerNotes": "Detailed presentation for AgriSense: Cultivating a Sustainable Future. AgriSense is revolutionizing agriculture with an innovative IoT sensor network designed for precision farming. Our technology delivers significant reductions in water usage, particularly in arid climates, paving the way for more sustainable and efficient food production."
+      },
+      {
+        "slideNumber": 2,
+        "title": "OUR MISSION",
+        "subtitle": "Innovating for a Thirsty Planet",
+        "content": "Precision Farming\nLeveraging advanced IoT sensors for real-time data collection and analysis.\nWater Conservation\nAchieving up to 40% reduction in water usage in arid regions, a critical environmental impact.\nSustainable Agriculture\nEmpowering farmers to produce more with less, ensuring food security for future generations.",
+        "allTexts": [
+          "OUR MISSION",
+          "Innovating for a Thirsty Planet",
+          "Precision Farming",
+          "Leveraging advanced IoT sensors for real-time data collection and analysis.",
+          "Water Conservation",
+          "Achieving up to 40% reduction in water usage in arid regions, a critical environmental impact.",
+          "Sustainable Agriculture",
+          "Empowering farmers to produce more with less, ensuring food security for future generations."
+        ],
+        "imageUrl": "/decks/agrisense/image-2-1.png",
+        "speakerNotes": "Detailed presentation for OUR MISSION. Innovating for a Thirsty Planet"
+      },
+      {
+        "slideNumber": 3,
+        "title": "THE PROBLEM",
+        "subtitle": "The Global Water Crisis in Agriculture",
+        "content": "Agriculture accounts for approximately 70% of global freshwater withdrawals, a figure that is unsustainable given increasing population demands and climate change. Inefficient irrigation practices lead to massive water waste, particularly in regions facing severe water scarcity.\nDepleting aquifers and rivers\nRising operational costs for farmers\nReduced crop yields due to water stress\nEnvironmental degradation and soil salinization",
+        "allTexts": [
+          "THE PROBLEM",
+          "The Global Water Crisis in Agriculture",
+          "Agriculture accounts for approximately 70% of global freshwater withdrawals, a figure that is unsustainable given increasing population demands and climate change. Inefficient irrigation practices lead to massive water waste, particularly in regions facing severe water scarcity.",
+          "Depleting aquifers and rivers",
+          "Rising operational costs for farmers",
+          "Reduced crop yields due to water stress",
+          "Environmental degradation and soil salinization"
+        ],
+        "imageUrl": "/decks/agrisense/image-3-1.png",
+        "speakerNotes": "Detailed presentation for THE PROBLEM. The Global Water Crisis in Agriculture"
+      },
+      {
+        "slideNumber": 4,
+        "title": "OUR SOLUTION",
+        "subtitle": "AgriSense: Smart Irrigation, Smarter Farms",
+        "content": "1\nAdvanced IoT Sensors\nOur network collects real-time data on soil moisture, temperature, and nutrient levels.\n2\nAI-Powered Analytics\nProprietary algorithms analyze data to provide precise irrigation recommendations.\n3\nAutomated Control\nIntegrates with existing irrigation systems for automated, optimized water delivery.\n4\nUser-Friendly Platform\nIntuitive dashboard for farmers to monitor and manage their fields remotely.",
+        "allTexts": [
+          "OUR SOLUTION",
+          "AgriSense: Smart Irrigation, Smarter Farms",
+          "1",
+          "Advanced IoT Sensors",
+          "Our network collects real-time data on soil moisture, temperature, and nutrient levels.",
+          "2",
+          "AI-Powered Analytics",
+          "Proprietary algorithms analyze data to provide precise irrigation recommendations.",
+          "3",
+          "Automated Control",
+          "Integrates with existing irrigation systems for automated, optimized water delivery.",
+          "4",
+          "User-Friendly Platform",
+          "Intuitive dashboard for farmers to monitor and manage their fields remotely."
+        ],
+        "imageUrl": "/decks/agrisense/image-4-1.png",
+        "speakerNotes": "Detailed presentation for OUR SOLUTION. AgriSense: Smart Irrigation, Smarter Farms"
+      },
+      {
+        "slideNumber": 5,
+        "title": "IMPACT",
+        "subtitle": "Transforming Water Usage and Sustainability",
+        "content": "40%\nWater Reduction\nProven water savings in arid climates.\n20%\nYield Increase\nOptimized irrigation leads to healthier, more productive crops.\n15%\nCost Savings\nReduced water and energy consumption lowers operational expenses.",
+        "allTexts": [
+          "IMPACT",
+          "Transforming Water Usage and Sustainability",
+          "40%",
+          "Water Reduction",
+          "Proven water savings in arid climates.",
+          "20%",
+          "Yield Increase",
+          "Optimized irrigation leads to healthier, more productive crops.",
+          "15%",
+          "Cost Savings",
+          "Reduced water and energy consumption lowers operational expenses."
+        ],
+        "imageUrl": "/decks/agrisense/image-5-1.png",
+        "speakerNotes": "Detailed presentation for IMPACT. Transforming Water Usage and Sustainability"
+      },
+      {
+        "slideNumber": 6,
+        "title": "TRACTION",
+        "subtitle": "Proven Results from Active Pilots",
+        "content": "We currently have 3 active pilot programs demonstrating the efficacy and impact of AgriSense in diverse agricultural settings. These pilots are generating invaluable data and refining our solution for broader market adoption.\nPilot 1: Almond Farm, California -\n35% water savings\nPilot 2: Vineyard, Texas -\n28% water savings, improved grape quality\nPilot 3: Vegetable Farm, Arizona -\n42% water savings, 20% yield increase",
+        "allTexts": [
+          "TRACTION",
+          "Proven Results from Active Pilots",
+          "We currently have 3 active pilot programs demonstrating the efficacy and impact of AgriSense in diverse agricultural settings. These pilots are generating invaluable data and refining our solution for broader market adoption.",
+          "Pilot 1: Almond Farm, California -",
+          "35% water savings",
+          "Pilot 2: Vineyard, Texas -",
+          "28% water savings, improved grape quality",
+          "Pilot 3: Vegetable Farm, Arizona -",
+          "42% water savings, 20% yield increase"
+        ],
+        "imageUrl": "/decks/agrisense/image-6-1.png",
+        "speakerNotes": "Detailed presentation for TRACTION. Proven Results from Active Pilots"
+      },
+      {
+        "slideNumber": 7,
+        "title": "MARKET OPPORTUNITY",
+        "subtitle": "Addressing a Multi-Billion Dollar Industry",
+        "content": "The global precision agriculture market is projected to reach over $12 billion by 2028, driven by the urgent need for sustainable practices and increased efficiency. AgriSense is uniquely positioned to capture a significant share of this rapidly expanding market.\nGlobal Reach\nAddressing water scarcity challenges worldwide.\nSignificant ROI\nClear financial benefits for farmers and investors.\nEnvironmental Imperative\nMeeting the demand for eco-friendly solutions.",
+        "allTexts": [
+          "MARKET OPPORTUNITY",
+          "Addressing a Multi-Billion Dollar Industry",
+          "The global precision agriculture market is projected to reach over $12 billion by 2028, driven by the urgent need for sustainable practices and increased efficiency. AgriSense is uniquely positioned to capture a significant share of this rapidly expanding market.",
+          "Global Reach",
+          "Addressing water scarcity challenges worldwide.",
+          "Significant ROI",
+          "Clear financial benefits for farmers and investors.",
+          "Environmental Imperative",
+          "Meeting the demand for eco-friendly solutions."
+        ],
+        "imageUrl": "/decks/agrisense/image-7-1.png",
+        "speakerNotes": "Detailed presentation for MARKET OPPORTUNITY. Addressing a Multi-Billion Dollar Industry"
+      },
+      {
+        "slideNumber": 8,
+        "title": "OUR TEAM",
+        "subtitle": "Experienced Leaders in AgriTech",
+        "content": "Dr. Anya Sharma\nCEO & Co-founder, 15+ years in IoT and agricultural science.\nMark Jensen\nCTO & Co-founder, 10+ years in sensor development and AI.\nSarah Chen\nHead of Business Development, 8+ years in agricultural markets.",
+        "allTexts": [
+          "OUR TEAM",
+          "Experienced Leaders in AgriTech",
+          "Dr. Anya Sharma",
+          "CEO & Co-founder, 15+ years in IoT and agricultural science.",
+          "Mark Jensen",
+          "CTO & Co-founder, 10+ years in sensor development and AI.",
+          "Sarah Chen",
+          "Head of Business Development, 8+ years in agricultural markets."
+        ],
+        "imageUrl": "/decks/agrisense/image-8-1.png",
+        "speakerNotes": "Detailed presentation for OUR TEAM. Experienced Leaders in AgriTech"
+      },
+      {
+        "slideNumber": 9,
+        "title": "INVESTMENT OPPORTUNITY",
+        "subtitle": "Join Us in Cultivating Change",
+        "content": "We are seeking\n$0.5M in pre-seed funding\nto accelerate product development, expand our pilot programs, and scale our market outreach. Your investment will fuel the next phase of growth for AgriSense.\nAsk Amount:\n$0.5M\nEquity Offered:\n15%\nValuation:\n[To be determined post-negotiation]",
+        "allTexts": [
+          "INVESTMENT OPPORTUNITY",
+          "Join Us in Cultivating Change",
+          "We are seeking",
+          "$0.5M in pre-seed funding",
+          "to accelerate product development, expand our pilot programs, and scale our market outreach. Your investment will fuel the next phase of growth for AgriSense.",
+          "Ask Amount:",
+          "$0.5M",
+          "Equity Offered:",
+          "15%",
+          "Valuation:",
+          "[To be determined post-negotiation]"
+        ],
+        "imageUrl": "/decks/agrisense/image-9-1.png",
+        "speakerNotes": "Detailed presentation for INVESTMENT OPPORTUNITY. Join Us in Cultivating Change"
+      },
+      {
+        "slideNumber": 10,
+        "title": "Grow the Future",
+        "subtitle": "Partner with AgriSense for a Greener Tomorrow",
+        "content": "Contact Us:\ninfo@agrisense.com | Austin, TX",
+        "allTexts": [
+          "Grow the Future",
+          "Partner with AgriSense for a Greener Tomorrow",
+          "Contact Us:",
+          "info@agrisense.com | Austin, TX"
+        ],
+        "imageUrl": "/decks/agrisense/image-10-1.png",
+        "speakerNotes": "Detailed presentation for Grow the Future. Partner with AgriSense for a Greener Tomorrow"
+      }
+    ]
+  },
+  {
+    "id": "nebula",
+    "title": "Nebula AI: Enterprise Workflow Automation",
+    "filename": "Nebula-AI-Revolutionizing-Enterprise-Workflow.pptx",
+    "totalSlides": 9,
+    "slides": [
+      {
+        "slideNumber": 1,
+        "title": "Nebula AI: Revolutionizing Enterprise Workflow",
+        "subtitle": "Welcome to Nebula AI, where we're building the future of enterprise workflow automation. Our generative AI platform is specifically designed to synthesize legal documents and streamline complex business processes, delivering unparalleled efficiency and accuracy to B2B SaaS clients.",
+        "content": "Welcome to Nebula AI, where we're building the future of enterprise workflow automation. Our generative AI platform is specifically designed to synthesize legal documents and streamline complex business processes, delivering unparalleled efficiency and accuracy to B2B SaaS clients.",
+        "allTexts": [
+          "Nebula AI: Revolutionizing Enterprise Workflow",
+          "Welcome to Nebula AI, where we're building the future of enterprise workflow automation. Our generative AI platform is specifically designed to synthesize legal documents and streamline complex business processes, delivering unparalleled efficiency and accuracy to B2B SaaS clients."
+        ],
+        "imageUrl": "/decks/nebula/image-1-1.png",
+        "speakerNotes": "Detailed presentation for Nebula AI: Revolutionizing Enterprise Workflow. Welcome to Nebula AI, where we're building the future of enterprise workflow automation. Our generative AI platform is specifically designed to synthesize legal documents and streamline complex business processes, delivering unparalleled efficiency and accuracy to B2B SaaS clients."
+      },
+      {
+        "slideNumber": 2,
+        "title": "ARTIFICIAL INTELLIGENCE",
+        "subtitle": "B2B SAAS",
+        "content": "The Nebula AI Advantage: Precision Automation\nAt Nebula AI, we harness the power of advanced generative AI to automate and optimize critical enterprise workflows. Our platform excels in tasks requiring high precision and contextual understanding, such as legal document synthesis, which typically demands extensive human capital and is prone to error.",
+        "allTexts": [
+          "ARTIFICIAL INTELLIGENCE",
+          "B2B SAAS",
+          "The Nebula AI Advantage: Precision Automation",
+          "At Nebula AI, we harness the power of advanced generative AI to automate and optimize critical enterprise workflows. Our platform excels in tasks requiring high precision and contextual understanding, such as legal document synthesis, which typically demands extensive human capital and is prone to error."
+        ],
+        "imageUrl": "/decks/nebula/image-2-1.png",
+        "speakerNotes": "Detailed presentation for ARTIFICIAL INTELLIGENCE. B2B SAAS"
+      },
+      {
+        "slideNumber": 3,
+        "title": "Our Core Focus: Legal Document Synthesis",
+        "subtitle": "The legal sector is ripe for disruption. Manual document review, contract drafting, and compliance checks are time-consuming and expensive. Nebula AI provides an intelligent solution, drastically reducing lead times and operational costs for our clients.",
+        "content": "Automated contract generation\nRapid legal research summarization\nCompliance and risk assessment\nIntelligent clause identification",
+        "allTexts": [
+          "Our Core Focus: Legal Document Synthesis",
+          "The legal sector is ripe for disruption. Manual document review, contract drafting, and compliance checks are time-consuming and expensive. Nebula AI provides an intelligent solution, drastically reducing lead times and operational costs for our clients.",
+          "Automated contract generation",
+          "Rapid legal research summarization",
+          "Compliance and risk assessment",
+          "Intelligent clause identification"
+        ],
+        "imageUrl": "/decks/nebula/image-3-1.png",
+        "speakerNotes": "Detailed presentation for Our Core Focus: Legal Document Synthesis. The legal sector is ripe for disruption. Manual document review, contract drafting, and compliance checks are time-consuming and expensive. Nebula AI provides an intelligent solution, drastically reducing lead times and operational costs for our clients."
+      },
+      {
+        "slideNumber": 4,
+        "title": "Market Opportunity: A $20 Billion Valuation",
+        "subtitle": "High Growth Market",
+        "content": "The B2B SaaS and AI sectors are experiencing explosive growth, with enterprise automation becoming a top priority for businesses seeking a competitive edge.\nSignificant Seed Ask\nWe are seeking an initial investment of $2.0M to scale operations and accelerate product development.\nStrong Valuation\nOur current valuation stands at $20.0M, reflecting strong market potential and early traction.",
+        "allTexts": [
+          "Market Opportunity: A $20 Billion Valuation",
+          "High Growth Market",
+          "The B2B SaaS and AI sectors are experiencing explosive growth, with enterprise automation becoming a top priority for businesses seeking a competitive edge.",
+          "Significant Seed Ask",
+          "We are seeking an initial investment of $2.0M to scale operations and accelerate product development.",
+          "Strong Valuation",
+          "Our current valuation stands at $20.0M, reflecting strong market potential and early traction."
+        ],
+        "imageUrl": "/decks/nebula/image-4-1.png",
+        "speakerNotes": "Detailed presentation for Market Opportunity: A $20 Billion Valuation. High Growth Market"
+      },
+      {
+        "slideNumber": 5,
+        "title": "Early Traction & Financial Snapshot",
+        "subtitle": "Nebula AI has achieved significant early traction, validating our product-market fit and showcasing the immense demand for our solution. Our recurring revenue demonstrates a solid foundation for rapid scalability.",
+        "content": "$50K\nMonthly Recurring Revenue (MRR)\nA strong indicator of growing customer adoption and satisfaction.",
+        "allTexts": [
+          "Early Traction & Financial Snapshot",
+          "Nebula AI has achieved significant early traction, validating our product-market fit and showcasing the immense demand for our solution. Our recurring revenue demonstrates a solid foundation for rapid scalability.",
+          "$50K",
+          "Monthly Recurring Revenue (MRR)",
+          "A strong indicator of growing customer adoption and satisfaction."
+        ],
+        "imageUrl": "/decks/nebula/image-5-1.png",
+        "speakerNotes": "Detailed presentation for Early Traction & Financial Snapshot. Nebula AI has achieved significant early traction, validating our product-market fit and showcasing the immense demand for our solution. Our recurring revenue demonstrates a solid foundation for rapid scalability."
+      },
+      {
+        "slideNumber": 6,
+        "title": "Our Vision: Automating the Future of Business",
+        "subtitle": "Nebula AI is not just about automating tasks; it's about empowering businesses to focus on strategic initiatives by removing the burden of repetitive, complex workflows. We envision a future where AI acts as a seamless co-pilot, enhancing human capabilities across every enterprise function.",
+        "content": "Nebula AI is not just about automating tasks; it's about empowering businesses to focus on strategic initiatives by removing the burden of repetitive, complex workflows. We envision a future where AI acts as a seamless co-pilot, enhancing human capabilities across every enterprise function.",
+        "allTexts": [
+          "Our Vision: Automating the Future of Business",
+          "Nebula AI is not just about automating tasks; it's about empowering businesses to focus on strategic initiatives by removing the burden of repetitive, complex workflows. We envision a future where AI acts as a seamless co-pilot, enhancing human capabilities across every enterprise function."
+        ],
+        "imageUrl": "/decks/nebula/image-6-1.png",
+        "speakerNotes": "Detailed presentation for Our Vision: Automating the Future of Business. Nebula AI is not just about automating tasks; it's about empowering businesses to focus on strategic initiatives by removing the burden of repetitive, complex workflows. We envision a future where AI acts as a seamless co-pilot, enhancing human capabilities across every enterprise function."
+      },
+      {
+        "slideNumber": 7,
+        "title": "The Team Behind Nebula AI",
+        "subtitle": "Our team comprises seasoned experts in artificial intelligence, software development, and B2B SaaS, bringing a wealth of experience to this endeavor. We are driven by a shared passion for innovation and a commitment to delivering transformative solutions.",
+        "content": "Dr. Anya Sharma\nCEO & Co-founder (AI Research & Strategy)\nMark Chen\nCTO & Co-founder (Platform Architecture)\nSophia Ramirez\nHead of Sales & Marketing (B2B SaaS Growth)",
+        "allTexts": [
+          "The Team Behind Nebula AI",
+          "Our team comprises seasoned experts in artificial intelligence, software development, and B2B SaaS, bringing a wealth of experience to this endeavor. We are driven by a shared passion for innovation and a commitment to delivering transformative solutions.",
+          "Dr. Anya Sharma",
+          "CEO & Co-founder (AI Research & Strategy)",
+          "Mark Chen",
+          "CTO & Co-founder (Platform Architecture)",
+          "Sophia Ramirez",
+          "Head of Sales & Marketing (B2B SaaS Growth)"
+        ],
+        "imageUrl": "/decks/nebula/image-7-1.png",
+        "speakerNotes": "Detailed presentation for The Team Behind Nebula AI. Our team comprises seasoned experts in artificial intelligence, software development, and B2B SaaS, bringing a wealth of experience to this endeavor. We are driven by a shared passion for innovation and a commitment to delivering transformative solutions."
+      },
+      {
+        "slideNumber": 8,
+        "title": "Why Invest in Nebula AI?",
+        "subtitle": "1",
+        "content": "Proven Technology\nOur generative AI platform is robust, scalable, and delivers measurable results.\n2\nMassive Market\nTargeting the multi-billion dollar B2B SaaS and legal tech markets.\n3\nStrong Traction\nDemonstrated MRR and positive customer feedback.\n4\nExperienced Team\nA diverse group of experts with a track record of success.",
+        "allTexts": [
+          "Why Invest in Nebula AI?",
+          "1",
+          "Proven Technology",
+          "Our generative AI platform is robust, scalable, and delivers measurable results.",
+          "2",
+          "Massive Market",
+          "Targeting the multi-billion dollar B2B SaaS and legal tech markets.",
+          "3",
+          "Strong Traction",
+          "Demonstrated MRR and positive customer feedback.",
+          "4",
+          "Experienced Team",
+          "A diverse group of experts with a track record of success."
+        ],
+        "imageUrl": "/decks/nebula/image-8-1.png",
+        "speakerNotes": "Detailed presentation for Why Invest in Nebula AI?. 1"
+      },
+      {
+        "slideNumber": 9,
+        "title": "The Road Ahead: Scaling for Impact",
+        "subtitle": "Q1-Q2: Product Enhancement",
+        "content": "Further refine legal synthesis capabilities and expand document types.\nQ3-Q4: Market Expansion\nTarget new verticals within B2B SaaS and forge strategic partnerships.\nYear 2: Global Reach\nInitiate international expansion and explore new AI applications.",
+        "allTexts": [
+          "The Road Ahead: Scaling for Impact",
+          "Q1-Q2: Product Enhancement",
+          "Further refine legal synthesis capabilities and expand document types.",
+          "Q3-Q4: Market Expansion",
+          "Target new verticals within B2B SaaS and forge strategic partnerships.",
+          "Year 2: Global Reach",
+          "Initiate international expansion and explore new AI applications."
+        ],
+        "imageUrl": "/decks/nebula/image-9-1.png",
+        "speakerNotes": "Detailed presentation for The Road Ahead: Scaling for Impact. Q1-Q2: Product Enhancement"
+      }
+    ]
+  }
+]

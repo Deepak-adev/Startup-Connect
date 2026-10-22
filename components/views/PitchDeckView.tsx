@@ -54,234 +54,232 @@ export default function PitchDeckView() {
     }
   }, [action, query, profile]);
 
+  // Load pitch deck PPT slides on Generate Deck
   const handleGenerateDeck = async () => {
     if (isGeneratingDeck) return;
     setIsGeneratingDeck(true);
-    setNotification("Generating pitch deck script...");
+    setNotification("Loading slides from Pitch Deck...");
     try {
-      // Use real Gemini 2.0 Flash generation
-      // Fallback profile if loading failed or empty
-      const currentProfile = profile || {
-        name: 'New Startup',
-        industry: 'Technology',
-        description: 'A revolutionary tech startup.',
-        problem: 'Inefficiency in the market.',
-        solution: 'AI-driven automation.',
-        targetAudience: 'Enterprises',
-        metrics: { tam: '10B', sam: '1B' }
-      };
+      const res = await fetch('/decks/decks.json');
+      const data = await res.json();
+      
+      // Use the presentation from the pitch deck folder
+      const deck = data?.[0];
+      if (deck && deck.slides) {
+        const slides: ParsedSlide[] = deck.slides.map((s: any) => ({
+          slideNumber: s.slideNumber,
+          title: s.title,
+          content: s.content,
+          bullets: s.bullets || [],
+          speakerNotes: s.bullets?.[0] || s.content || ''
+        }));
 
-      const script = await generatePitchDeckScript(currentProfile);
-      setDeckScript(script);
+        setParsedSlides(slides);
+        setCurrentSlide(1);
 
-      const slides = parseSlideScript(script);
-      setParsedSlides(slides);
+        const imgMap = new Map<number, string>();
+        deck.slides.forEach((s: any) => {
+          if (s.imageUrl) imgMap.set(s.slideNumber, s.imageUrl);
+        });
+        setSlideImages(imgMap);
 
-      setNotification("Script generated! Creating visuals...");
-      handleGenerateSlideImages(slides); // Auto trigger images
+        const scriptText = slides.map(s => 
+          `Slide ${s.slideNumber}: ${s.title}\n${s.content}`
+        ).join('\n\n---\n\n');
+        setDeckScript(scriptText);
+
+        setNotification(`Generated! Loaded ${slides.length} slides.`);
+      }
     } catch (error) {
-      console.error("Deck generation failed", error);
-      setNotification("Failed to generate deck script.");
+      console.error("Deck load failed", error);
+      setNotification("Failed to load slides.");
     } finally {
       setIsGeneratingDeck(false);
     }
   };
 
-  const handleGenerateSlideImages = async (slides: ParsedSlide[]) => {
-    setIsGeneratingImages(true);
-    try {
-      // Prepare requests for batch generation
-      const requests = slides.map(s => ({
-        slideNumber: s.slideNumber,
-        slideTitle: s.title,
-        slideContent: s.content, // content is string
-        speakerNotes: s.speakerNotes,
-        companyName: profile?.name
-      }));
-
-      // Use real Gemini 3 Pro Vision generation
-      const generatedImages = await generateSlideImages(requests);
-
-      const newImages = new Map(slideImages);
-      generatedImages.forEach(img => {
-        if (img.status === 'success') {
-          newImages.set(img.slideNumber, img.imageUrl);
-        }
-      });
-
-      setSlideImages(newImages);
-      setNotification("Deck generation complete!");
-    } catch (error) {
-      console.error("Image generation failed", error);
-      setNotification("Some images failed to generate.");
-    } finally {
-      setIsGeneratingImages(false);
-    }
-  };
+  const currentSlideObj = parsedSlides.find(s => s.slideNumber === currentSlide) || parsedSlides[0];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10 relative bg-slate-50/50 min-h-screen px-2 h-screen flex flex-col">
-
+    <div className="space-y-6 animate-in fade-in duration-500 pb-10 relative bg-slate-50 min-h-screen px-4 md:px-8 py-6 flex flex-col font-sans">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed bottom-6 left-6 z-50 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 left-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-in slide-in-from-bottom-4 border border-slate-700/60 text-sm">
           <Sparkles size={16} className="text-indigo-400" />
-          {notification}
+          <span>{notification}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200/60 flex-shrink-0">
+      {/* Header Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 flex-shrink-0">
         <div>
-          <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-900 tracking-tight">
             Pitch Deck Studio
           </h1>
-          <p className="text-slate-500 mt-1 text-lg">
-            AI-powered storytelling for {profile?.name || 'Your Startup'}.
+          <p className="text-slate-500 mt-1 text-sm">
+            AI-powered presentation for {profile?.name || 'Your Startup'}.
           </p>
         </div>
+
+        {/* Action Button */}
         <div className="flex items-center gap-3">
-          <div className="bg-slate-100 p-1 rounded-xl flex gap-1">
+          <div className="bg-slate-200/70 p-1 rounded-xl flex gap-1">
             <button
               onClick={() => setActiveTab('editor')}
-              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'editor' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                activeTab === 'editor' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              Script Editor
+              Workspace
             </button>
             <button
               onClick={() => setActiveTab('preview')}
-              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'preview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                activeTab === 'preview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              Presentation Mode
+              Present
             </button>
           </div>
+
           <Button
             onClick={handleGenerateDeck}
             disabled={isGeneratingDeck}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white h-11 px-6 rounded-xl shadow-lg shadow-indigo-500/20 gap-2 font-semibold"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white h-10 px-5 rounded-xl shadow-md shadow-indigo-500/20 gap-2 text-xs font-semibold cursor-pointer"
           >
-            {isGeneratingDeck ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+            {isGeneratingDeck ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
             Generate Deck
           </Button>
-          <Button variant="outline" className="h-11 w-11 p-0 rounded-xl bg-white border-slate-200 text-slate-700 hover:text-indigo-600">
-            <Share2 size={20} />
-          </Button>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-        {/* Main Workspace */}
-        <div className="lg:col-span-8 flex flex-col gap-6 h-full min-h-0">
-          {/* Slide Preview / Canvas */}
-          <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] relative overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+      {/* Main Grid */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Main Canvas / Slide Viewer */}
+        <div className={`${activeTab === 'preview' ? 'lg:col-span-12' : 'lg:col-span-8'} flex flex-col gap-4 h-full min-h-0`}>
+          <div className="flex-1 bg-white rounded-2xl border border-slate-200/90 shadow-lg shadow-slate-200/50 relative overflow-hidden flex flex-col min-h-[500px]">
+            {/* Top Toolbar */}
+            <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Slide {currentSlide} of {parsedSlides.length || 5}</span>
-                {isGeneratingImages && <span className="text-xs text-indigo-600 flex items-center gap-1 animate-pulse"><Loader2 size={12} className="animate-spin" /> Rendering Assets</span>}
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Slide {currentSlide} of {parsedSlides.length}
+                </span>
+                <span className="text-xs text-slate-400 font-medium truncate max-w-xs">
+                  {currentSlideObj?.title}
+                </span>
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setCurrentSlide(Math.max(1, currentSlide - 1))} disabled={currentSlide === 1}><Layout size={16} /></Button>
-              </div>
-            </div>
-
-            <div className="flex-1 bg-slate-100 flex items-center justify-center p-8 relative overflow-hidden group">
-              {/* Checkerboard pattern background */}
-              <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(45deg,#000_25%,transparent_25%,transparent_75%,#000_75%,#000),linear-gradient(45deg,#000_25%,transparent_25%,transparent_75%,#000_75%,#000)] bg-[length:20px_20px] bg-[position:0_0,10px_10px]"></div>
-
-              <div className="aspect-video w-full max-h-full bg-white shadow-2xl rounded-xl overflow-hidden relative transition-transform duration-500 ease-out group-hover:scale-[1.02]">
-                {slideImages.get(currentSlide) ? (
-                  <img src={slideImages.get(currentSlide)} alt="Slide" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                    {isGeneratingImages ? <Loader2 size={48} className="animate-spin mb-4 text-indigo-200" /> : <ImageIcon size={64} className="mb-4 opacity-50" />}
-                    <p className="font-medium text-slate-400">{isGeneratingImages ? 'Generating AI Visuals...' : 'Preview Unavailable'}</p>
-                  </div>
-                )}
-
-                {/* Overlay Controls */}
-                <div className="absolute bottom-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button className="bg-black/50 hover:bg-black/70 text-white border-0 backdrop-blur-md h-10 w-10 p-0 rounded-full"><Edit3 size={16} /></Button>
-                  <Button className="bg-indigo-600/90 hover:bg-indigo-600 text-white border-0 backdrop-blur-md h-10 w-10 p-0 rounded-full shadow-lg"><Download size={16} /></Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Thumbnails Strip */}
-            <div className="h-28 bg-white border-t border-slate-100 p-4 flex gap-4 overflow-x-auto">
-              {(parsedSlides.length > 0 ? parsedSlides : [1, 2, 3, 4, 5]).map((s, i) => {
-                const num = typeof s === 'number' ? s : s.slideNumber;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentSlide(num)}
-                    className={`aspect-video h-full rounded-lg border-2 transition-all overflow-hidden relative flex-shrink-0 ${currentSlide === num ? 'border-indigo-600 ring-2 ring-indigo-100 shadow-md' : 'border-slate-100 hover:border-slate-300'}`}
-                  >
-                    {slideImages.get(num) ? (
-                      <img src={slideImages.get(num)} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300 text-xs font-bold">
-                        {num}
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
-              <button className="aspect-video h-full rounded-lg border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 gap-1">
-                <PlusIcon size={20} />
-                <span className="text-[10px] font-bold uppercase">Add Slide</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar Tools */}
-        <div className="lg:col-span-4 flex flex-col gap-6 h-full min-h-0 overflow-y-auto pb-4">
-
-          {/* Script Editor Card */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex-1 flex flex-col min-h-[400px]">
-            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <FileText size={20} className="text-slate-400" />
-              Script & Content
-            </h3>
-            <textarea
-              value={deckScript}
-              onChange={(e) => setDeckScript(e.target.value)}
-              placeholder="Generative AI will write your pitch here..."
-              className="flex-1 w-full p-4 bg-slate-50 border-0 rounded-xl text-sm font-mono text-slate-600 leading-relaxed resize-none focus:ring-2 focus:ring-indigo-500/20 outline-none"
-            />
-            <div className="mt-4 flex justify-between items-center text-xs text-slate-400 font-medium">
-              <span>{deckScript.split(' ').length} words</span>
-              <span className="flex items-center gap-1 text-emerald-600"><Check size={12} /> Saved</span>
-            </div>
-          </div>
-
-          {/* Media Card */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Video size={20} className="text-indigo-600" />
-              Veo AI Video
-            </h3>
-
-            <div className="bg-slate-900 rounded-xl aspect-video relative overflow-hidden group">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Button className="rounded-full w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white pl-4 shadow-xl border-0">
-                  <Play fill="currentColor" size={24} />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentSlide(Math.max(1, currentSlide - 1))}
+                  disabled={currentSlide === 1}
+                  className="h-8 px-3 rounded-lg text-xs"
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentSlide(Math.min(parsedSlides.length, currentSlide + 1))}
+                  disabled={currentSlide === parsedSlides.length}
+                  className="h-8 px-3 rounded-lg text-xs"
+                >
+                  Next
                 </Button>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <p className="text-white text-sm font-bold">Pitch Rehearsal 1</p>
-                <p className="text-slate-300 text-xs">02:14 • AI Narration</p>
+            </div>
+
+            {/* Slide Presentation Area */}
+            <div className="flex-1 bg-slate-950 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+              <div className="aspect-video w-full max-w-5xl bg-slate-900 rounded-xl overflow-hidden shadow-2xl relative border border-slate-800 flex items-center justify-center">
+                {slideImages.get(currentSlide) ? (
+                  <img
+                    src={slideImages.get(currentSlide)}
+                    alt={`Slide ${currentSlide}`}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
+                    <ImageIcon size={48} className="mb-3 opacity-40" />
+                    <p className="text-sm">Click "Generate Deck" to load slides</p>
+                  </div>
+                )}
               </div>
             </div>
-            <Button className="w-full mt-4 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100 rounded-xl font-semibold">
-              <Sparkles size={16} className="mr-2" /> Generate New Video
-            </Button>
+
+            {/* Slide Filmstrip / Thumbnails */}
+            <div className="h-28 bg-white border-t border-slate-100 p-3 flex gap-3 overflow-x-auto">
+              {parsedSlides.map((s) => (
+                <button
+                  key={s.slideNumber}
+                  onClick={() => setCurrentSlide(s.slideNumber)}
+                  className={`aspect-video h-full rounded-lg border-2 transition-all overflow-hidden relative flex-shrink-0 cursor-pointer ${
+                    currentSlide === s.slideNumber
+                      ? 'border-indigo-600 ring-2 ring-indigo-200 shadow-md scale-[1.02]'
+                      : 'border-slate-200 hover:border-slate-400 opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  {slideImages.get(s.slideNumber) ? (
+                    <img src={slideImages.get(s.slideNumber)} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-slate-900 p-2 flex flex-col justify-between text-left">
+                      <span className="text-[10px] text-indigo-400 font-bold">Slide {s.slideNumber}</span>
+                      <p className="text-[9px] text-white font-medium line-clamp-2 leading-tight">
+                        {s.title}
+                      </p>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-
         </div>
-      </div>
 
+        {/* Sidebar: Presenter Notes & Pitch Video */}
+        {activeTab === 'editor' && (
+          <div className="lg:col-span-4 flex flex-col gap-5 h-full min-h-0">
+            {/* Pitch Video Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <Video size={17} className="text-indigo-600" />
+                  Pitch Video
+                </h3>
+                <span className="text-[11px] bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded-full border border-indigo-100">
+                  HD 1080p
+                </span>
+              </div>
+              <div className="aspect-video w-full rounded-xl overflow-hidden bg-black shadow-md border border-slate-800 relative group">
+                <video
+                  src="/videos/pitch_video.mp4"
+                  controls
+                  playsInline
+                  className="w-full h-full object-contain"
+                  poster={slideImages.get(1) || undefined}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-2.5">
+                AI Generated Pitch Video from the Pitch Video folder.
+              </p>
+            </div>
+
+            {/* Presenter Notes for Active Slide */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex-1 flex flex-col">
+              <h3 className="font-bold text-slate-900 text-sm mb-2.5 flex items-center gap-2">
+                <FileText size={16} className="text-indigo-600" />
+                Presenter Notes (Slide {currentSlide})
+              </h3>
+              <div className="flex-1 text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 font-sans overflow-y-auto">
+                <p className="font-semibold text-slate-800 mb-1.5">{currentSlideObj?.title}</p>
+                <p className="text-slate-600 leading-normal">{currentSlideObj?.speakerNotes || "Present key metrics and value proposition for this slide."}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

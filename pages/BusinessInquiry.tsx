@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AGUIChat from '../components/AGUIChat';
-import { ArrowRight, Loader2 } from 'lucide-react'; // Added Loader2
+import { ArrowRight, Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { generateProfileFromChat } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
@@ -90,81 +90,152 @@ export default function BusinessInquiry() {
         setStep('chat');
     };
 
+    const [showPassword, setShowPassword] = useState(false);
+
     return (
-        <div className="h-screen w-full bg-slate-50 flex flex-col relative overflow-hidden">
-            {step === 'chat' && (
-                <div className="absolute top-4 right-4 z-50">
-                    <button
-                        onClick={handleComplete}
-                        disabled={isAnalyzing}
-                        className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-indigo-600 font-medium shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {isAnalyzing ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span>Analyzing...</span>
-                            </>
-                        ) : (
-                            <>
-                                <span>Complete Analysis</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
+        <div className="min-h-screen w-full bg-slate-50 text-slate-800 flex flex-col relative overflow-y-auto font-sans selection:bg-indigo-500 selection:text-white pb-10">
+            {/* Soft Ambient Pastel Background Blurs */}
+            <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[650px] h-[350px] bg-gradient-to-tr from-indigo-100/60 via-purple-100/50 to-pink-100/50 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-5%] w-[450px] h-[450px] bg-sky-100/60 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-1/3 left-[-10%] w-[400px] h-[400px] bg-emerald-100/40 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 flex flex-col min-h-0">
-                <div className="text-center mb-6 flex-shrink-0">
-                    <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900">
-                        {step === 'register' ? 'Create Your Account' : 'Tell me about your business'}
-                    </h2>
-                    <p className="text-slate-500 mt-2">
-                        {step === 'register' ? 'Secure your startup journey first.' : "I'll help you generate pitch decks, reports, and more."}
-                    </p>
-                </div>
+            {/* Subtle Grid Pattern Overlay */}
+            <div 
+                className="absolute inset-0 opacity-[0.025] pointer-events-none"
+                style={{
+                    backgroundImage: `radial-gradient(circle at 1px 1px, #0f172a 1px, transparent 0)`,
+                    backgroundSize: '24px 24px'
+                }}
+            />
 
+            <div className={`flex-1 w-full ${step === 'register' ? 'max-w-md mx-auto p-4 flex flex-col justify-center' : 'max-w-5xl mx-auto p-4 md:p-6 flex flex-col min-h-[650px]'} relative z-10`}>
                 {step === 'register' ? (
-                    <div className="w-full max-w-md mx-auto bg-white border border-slate-200 rounded-2xl p-8 shadow-xl shadow-slate-200/50 overflow-y-auto">
-                        <form onSubmit={handleRegister} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700">Email Address</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={regData.email}
-                                    onChange={(e) => setRegData({ ...regData, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
-                                    placeholder="founder@startup.com"
+                    <div className="w-full max-w-md mx-auto my-auto animate-fade-in-up">
+                        {/* Header Branding */}
+                        <div className="text-center mb-5">
+                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white border border-slate-100 p-2.5 mb-3 shadow-md shadow-slate-200/60">
+                                <img
+                                    src="/logo.png"
+                                    alt="Startup Connect"
+                                    className="w-full h-full object-contain"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={regData.password}
-                                    onChange={(e) => setRegData({ ...regData, password: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-pink-600 text-white font-bold text-lg shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
-                            >
-                                <span>Continue to Analysis</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </form>
+                            <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight text-slate-900">
+                                Create Your Account
+                            </h1>
+                            <p className="text-slate-500 text-xs mt-1 font-normal">
+                                Secure your startup journey first.
+                            </p>
+                        </div>
+
+                        {/* Crisp White Card */}
+                        <div className="relative rounded-2xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/60 p-6 md:p-7">
+                            <form onSubmit={handleRegister} className="space-y-4">
+                                {/* Email Input */}
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 ml-0.5">
+                                        Email Address
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <Mail className="w-4 h-4" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={regData.email}
+                                            onChange={(e) => setRegData({ ...regData, email: e.target.value })}
+                                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-200"
+                                            placeholder="founder@startup.com"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Password Input */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between ml-0.5">
+                                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                                            Password
+                                        </label>
+                                        <span className="text-[11px] text-slate-400">Min. 6 characters</span>
+                                    </div>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <Lock className="w-4 h-4" />
+                                        </div>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            required
+                                            value={regData.password}
+                                            onChange={(e) => setRegData({ ...regData, password: e.target.value })}
+                                            className="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-200"
+                                            placeholder="••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                                            tabIndex={-1}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="w-4 h-4" />
+                                            ) : (
+                                                <Eye className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Security / Trust Perk */}
+                                <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600">
+                                    <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                                    <span>256-bit encrypted • Confidential deal flow</span>
+                                </div>
+
+                                {/* Action Button */}
+                                <button
+                                    type="submit"
+                                    className="group relative w-full py-3 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white font-semibold text-sm shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/35 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <span>Continue to Analysis</span>
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </form>
+
+                            {/* Terms & Footer Note */}
+                            <p className="mt-4 text-center text-[11px] text-slate-400">
+                                By continuing, you agree to our{' '}
+                                <span className="text-slate-600 hover:underline cursor-pointer">Terms</span> and{' '}
+                                <span className="text-slate-600 hover:underline cursor-pointer">Privacy Policy</span>
+                            </p>
+                        </div>
                     </div>
                 ) : (
                     /* Full Screen Chat Interface */
-                    <div className="flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 bg-white min-h-0 flex flex-col">
+                    <div className="flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-xl shadow-slate-200/50 bg-white min-h-0 flex flex-col">
                         <AGUIChat
                             fullScreenMode={true}
                             onAnalysisComplete={handleAnalysisComplete}
                             onMessagesChange={setChatMessages}
+                            headerAction={
+                                <button
+                                    onClick={handleComplete}
+                                    disabled={isAnalyzing}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                                >
+                                    {isAnalyzing ? (
+                                        <>
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                            <span>Analyzing Profile...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Complete Analysis</span>
+                                            <ArrowRight className="w-3.5 h-3.5" />
+                                        </>
+                                    )}
+                                </button>
+                            }
                             initialMessage="Hello! Now that you're signed up, let's build your profile. Tell me about your business idea. What problem are you solving and who is your target market?"
                             systemInstruction={`
 You are AGUI, a patient and helpful startup profile builder.

@@ -44,11 +44,78 @@ You drive the website by outputting a JSON object.
 DO NOT use Markdown code blocks. Output raw JSON.
 `;
 
-let client: GoogleGenAI | null = null;
+export const getApiKey = (): string => {
+  return (
+    (typeof process !== 'undefined' && process.env?.API_KEY) ||
+    (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ||
+    (typeof process !== 'undefined' && process.env?.GROQ_API_KEY) ||
+    (import.meta as any).env?.VITE_GEMINI_API_KEY ||
+    (import.meta as any).env?.VITE_GROQ_API_KEY ||
+    (typeof window !== 'undefined' && (localStorage.getItem('GROQ_API_KEY') || localStorage.getItem('GEMINI_API_KEY'))) ||
+    ''
+  );
+};
+
+export const getGroqApiKey = (): string => {
+  return (
+    (typeof process !== 'undefined' && (process.env?.GROQ_API_KEY || process.env?.API_KEY)) ||
+    (typeof window !== 'undefined' && localStorage.getItem('GROQ_API_KEY')) ||
+    ''
+  );
+};
+
+// Direct Groq API client with auto-fallback across production models
+const callGroqAI = async (messages: { role: string; content: string }[], responseFormatJson = true): Promise<string> => {
+  const apiKey = getGroqApiKey();
+  const candidateModels = [
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b"
+  ];
+
+  let lastError: any = null;
+
+  for (const model of candidateModels) {
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          ...(responseFormatJson ? { response_format: { type: "json_object" } } : {}),
+          temperature: 0.6
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) return content;
+      } else {
+        const errorBody = await res.text();
+        lastError = new Error(`Groq ${model} Error (${res.status}): ${errorBody}`);
+        console.warn(`Model ${model} failed, attempting next model...`, errorBody);
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("All Groq models failed");
+};
 
 const getClient = () => {
+  const apiKey = getApiKey();
+  if (!apiKey || apiKey.startsWith('gsk_')) {
+    // If Groq key, let Groq handler process it
+    return null;
+  }
   if (!client) {
-    client = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    client = new GoogleGenAI({ apiKey });
   }
   return client;
 };
@@ -58,10 +125,50 @@ export const sendMessageToAGUI = async (
   newMessage: string,
   systemInstruction?: string
 ): Promise<AGUIResponse> => {
+  // Check if we have a Groq key (starts with gsk_) or default to Groq
+  const groqKey = getGroqApiKey();
+  if (groqKey) {
+    try {
+      const groqMessages = [
+        { role: "system", content: systemInstruction || SYSTEM_INSTRUCTION },
+        ...history.slice(-10).map(m => ({
+          role: m.role === 'model' ? 'assistant' : 'user',
+          content: m.text
+        })),
+        { role: "user", content: newMessage }
+      ];
+
+      const content = await callGroqAI(groqMessages, true);
+      const cleanedText = content.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(cleanedText) as AGUIResponse;
+    } catch (err) {
+      console.error("Groq AGUI Error:", err);
+    }
+  }
+
   const ai = getClient();
 
+  if (!ai) {
+    // Fallback questionnaire if no key works
+    const userRepliesCount = history.filter(m => m.role === 'user').length;
+    const questions = [
+      "Great to hear! Could you describe the innovative solution or product you are building to address this?",
+      "Who is your primary target audience and what geography are you focusing on first?",
+      "What is your revenue model (e.g. subscription, transaction fee, direct sales)?",
+      "What stage is your startup currently in (Idea, MVP, or already generating revenue)?",
+      "How much funding are you planning to raise and who are your main competitors?",
+      "Awesome! We have captured the core details of your startup. Click 'Complete Analysis' to view your generated dashboard and pitch materials!"
+    ];
+    const nextQuestion = questions[Math.min(userRepliesCount, questions.length - 1)];
+
+    return {
+      thought: "No API key configured; serving simulated questionnaire.",
+      message: nextQuestion,
+      navigation: userRepliesCount >= 4 ? { path: "/app" } : undefined
+    };
+  }
+
   // Construct the conversation history for the context
-  // We limit context to last 10 turns to keep it snappy and focused
   const recentHistory = history.slice(-10).map(msg => ({
     role: msg.role === 'model' ? 'model' : 'user',
     parts: [{ text: msg.text }]
@@ -69,7 +176,7 @@ export const sendMessageToAGUI = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: [
         ...recentHistory,
         { role: 'user', parts: [{ text: newMessage }] }
@@ -85,7 +192,6 @@ export const sendMessageToAGUI = async (
       throw new Error("Empty response from AGUI");
     }
 
-    // Attempt to clean markdown if present (though system instruction says not to)
     const cleanedText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanedText) as AGUIResponse;
 
@@ -93,14 +199,73 @@ export const sendMessageToAGUI = async (
     console.error("AGUI Error:", error);
     return {
       thought: "Error in processing",
-      message: "I'm having trouble connecting to my neural core. Please try again.",
+      message: "I'm having trouble connecting to my neural core. Please check your API key, or use 'Complete Analysis' at any time.",
       navigation: undefined
     };
   }
 };
 
 export const generateProfileFromChat = async (history: ChatMessage[]): Promise<any> => {
+  const groqKey = getGroqApiKey();
+  if (groqKey) {
+    try {
+      const groqMessages = [
+        {
+          role: "system",
+          content: "You are an expert startup analyst. Extract structured startup data into strict JSON format with no markdown wrappers."
+        },
+        ...history.map(m => ({
+          role: m.role === 'model' ? 'assistant' : 'user',
+          content: m.text
+        })),
+        {
+          role: "user",
+          content: `Extract the startup profile into JSON matching this exact structure:
+{
+  "name": "Business Name",
+  "industry": "Industry",
+  "description": "Full description",
+  "targetAudience": "...",
+  "problem": "...",
+  "solution": "...",
+  "revenueModel": "...",
+  "pricingStrategy": "...",
+  "stage": "...",
+  "teamSize": "...",
+  "fundingHistory": "...",
+  "fundraisingGoals": "...",
+  "competitors": "...",
+  "marketingChannels": "...",
+  "challenges": "...",
+  "timeline": "...",
+  "metrics": {
+    "tam": "$10B",
+    "sam": "$2B",
+    "som": "$100M"
+  }
+}`
+        }
+      ];
+
+      const content = await callGroqAI(groqMessages, true);
+      const cleanedText = content.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(cleanedText);
+    } catch (err) {
+      console.error("Groq Profile Extraction Error:", err);
+    }
+  }
+
   const ai = getClient();
+  if (!ai) {
+    return {
+      name: "New Startup",
+      industry: "Technology / AI",
+      stage: "Idea / MVP",
+      description: "A forward-thinking startup building intelligent software solutions.",
+      targetAudience: "Modern businesses and innovators",
+      metrics: { tam: "$10B", sam: "$2B", som: "$100M" }
+    };
+  }
 
   // Convert history for the model
   const conversation = history.map(msg => ({
@@ -167,7 +332,51 @@ export const generateProfileFromChat = async (history: ChatMessage[]): Promise<a
 };
 
 export const generateInvestorProfileFromChat = async (history: ChatMessage[]): Promise<any> => {
+  const groqKey = getGroqApiKey();
+  if (groqKey) {
+    try {
+      const groqMessages = [
+        {
+          role: "system",
+          content: "You are an investment analyst. Extract structured investor onboarding profile data into JSON with no markdown."
+        },
+        ...history.map(m => ({
+          role: m.role === 'model' ? 'assistant' : 'user',
+          content: m.text
+        })),
+        {
+          role: "user",
+          content: `Extract the investor profile into JSON matching this exact structure:
+{
+  "name": "Investor/Fund Name",
+  "type": "VC Firm",
+  "thesis": "Summary of thesis",
+  "ticketSize": { "min": "$100K", "max": "$2M" },
+  "industries": ["AI", "SaaS", "FinTech"],
+  "stages": ["Seed", "Series A"],
+  "geography": "Global"
+}`
+        }
+      ];
+
+      const content = await callGroqAI(groqMessages, true);
+      const cleanedText = content.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(cleanedText);
+    } catch (err) {
+      console.error("Groq Investor Extraction Error:", err);
+    }
+  }
+
   const ai = getClient();
+  if (!ai) {
+    return {
+      name: "Venture Capital Partners",
+      type: "VC Firm",
+      thesis: "Investing in early-stage AI and High-growth Tech startups.",
+      ticketSize: { min: "$100K", max: "$2M" },
+      industries: ["AI", "SaaS", "FinTech"]
+    };
+  }
 
   const conversation = history.map(msg => ({
     role: msg.role === 'model' ? 'model' : 'user',

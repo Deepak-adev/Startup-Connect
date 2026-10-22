@@ -1,0 +1,90 @@
+[
+  {
+    "id": "agrisense",
+    "title": "AgriSense: Cultivating a Sustainable Future",
+    "slides": [
+      {
+        "slideNumber": 1,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_1.png"
+      },
+      {
+        "slideNumber": 2,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_2.png"
+      },
+      {
+        "slideNumber": 3,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_3.png"
+      },
+      {
+        "slideNumber": 4,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_4.png"
+      },
+      {
+        "slideNumber": 5,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_5.png"
+      },
+      {
+        "slideNumber": 6,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_6.png"
+      },
+      {
+        "slideNumber": 7,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_7.png"
+      },
+      {
+        "slideNumber": 8,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_8.png"
+      },
+      {
+        "slideNumber": 9,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_9.png"
+      },
+      {
+        "slideNumber": 10,
+        "imageUrl": "/decks/AgriSense-Cultivating-a-Sustainable-Future/slide_10.png"
+      }
+    ]
+  },
+  {
+    "id": "nebula",
+    "title": "Nebula AI: Enterprise Workflow Automation",
+    "slides": [
+      {
+        "slideNumber": 1,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_1.png"
+      },
+      {
+        "slideNumber": 2,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_2.png"
+      },
+      {
+        "slideNumber": 3,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_3.png"
+      },
+      {
+        "slideNumber": 4,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_4.png"
+      },
+      {
+        "slideNumber": 5,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_5.png"
+      },
+      {
+        "slideNumber": 6,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_6.png"
+      },
+      {
+        "slideNumber": 7,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_7.png"
+      },
+      {
+        "slideNumber": 8,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_8.png"
+      },
+      {
+        "slideNumber": 9,
+        "imageUrl": "/decks/Nebula-AI-Revolutionizing-Enterprise-Workflow/slide_9.png"
+      }
+    ]
+  }
+]

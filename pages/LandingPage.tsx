@@ -86,10 +86,11 @@ export default function LandingPage() {
                         </button>
                         <button
                             onClick={() => navigate('/inquiry')}
-                            className="px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-medium hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 flex items-center gap-2 transition-all duration-300 ring-2 ring-transparent hover:ring-indigo-100"
+                            className="px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-medium hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 flex items-center gap-2.5 transition-all duration-300 ring-2 ring-transparent hover:ring-indigo-100"
                         >
-                            Start Chatting
-                            <MessageSquare className="w-4 h-4" />
+                            <img src="/logo.png" alt="Logo" className="w-4 h-4 object-contain rounded-full" />
+                            <span>Start Chatting</span>
+                            <MessageSquare className="w-4 h-4 opacity-70" />
                         </button>
                     </div>
                 </div>
